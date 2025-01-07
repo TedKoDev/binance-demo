@@ -1,10 +1,12 @@
 import React from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
+import { useRecoilState } from "recoil";
 
 import { useFilteredTradingPairs } from "../hooks/useFilteredTradingPairs";
 import { use24hrTicker } from "@/hooks/queries/useCoinList";
 import { TickerData } from "@/api/binance";
+import { coinState } from "@/atoms/coinAtom";
 
 interface TradingPairsListProps {
   selectedTab: string;
@@ -13,13 +15,29 @@ interface TradingPairsListProps {
 }
 
 export const TradingPairsList: React.FC<TradingPairsListProps> = ({ selectedTab, selectedSubTabs, onPairSelect }) => {
+  const [coin, setCoin] = useRecoilState(coinState);
   const { data: tickerData } = use24hrTicker();
-  const filteredPairs = useFilteredTradingPairs(tickerData, selectedTab, selectedSubTabs);
+  const filteredPairs = useFilteredTradingPairs(tickerData as TickerData[], selectedTab, selectedSubTabs);
+
+  const handlePairSelect = (pair: any) => {
+    setCoin((prev) => ({
+      ...prev,
+      selectedCoin: pair.symbol,
+      selectedPair: pair.pair,
+      priceChange: pair.change,
+    }));
+    onPairSelect();
+  };
 
   return (
     <BottomSheetScrollView>
       {filteredPairs.map((pair, index) => (
-        <TouchableOpacity key={index} style={{ height: 72 }} className="flex-row items-center justify-between px-4 border-b border-gray-100" onPress={onPairSelect}>
+        <TouchableOpacity
+          key={index}
+          style={{ height: 72 }}
+          className={`flex-row items-center justify-between px-4 border-b border-gray-100 ${pair.symbol === coin.selectedCoin && pair.pair === coin.selectedPair ? "bg-gray-50" : ""}`}
+          onPress={() => handlePairSelect(pair)}
+        >
           <View>
             <View className="flex-row items-center">
               <Text className="text-base font-bold">{pair.symbol}</Text>

@@ -9,6 +9,8 @@ import { use24hrTicker, useCoinList } from "@/hooks/queries/useCoinList";
 import { TradingPairsList } from "@/components/TradingPairsList";
 import { SubTabs } from "@/components/SubTabs";
 import { altsSubTabs, fiatSubTabs } from "@/constants/Tabs";
+import { useRecoilState } from "recoil";
+import { coinState } from "@/atoms/coinAtom";
 
 export default function TradeScreen() {
   const [orderType, setOrderType] = useState("Limit");
@@ -19,11 +21,12 @@ export default function TradeScreen() {
   const symbolBottomSheetRef = useRef<BottomSheet>(null);
   const symbolSnapPoints = useMemo(() => ["80%"], []);
   const [refreshing, setRefreshing] = useState(false);
-  const [selectedTab, setSelectedTab] = useState("USDT");
-  const [selectedSubTabs, setSelectedSubTabs] = useState<string[]>(["ETH"]);
-  const { data: tickerData } = use24hrTicker();
-  const headerHeight = 180; // 기본 헤더 높이
-  const subTabsHeight = 50; // 서브탭 높이
+  const [coin, setCoin] = useRecoilState(coinState);
+
+  console.log(coin);
+  // const { data: tickerData } = use24hrTicker();
+  // const headerHeight = 180; // 기본 헤더 높이
+  // const subTabsHeight = 50; // 서브탭 높이
 
   const handleOrderTypePress = useCallback(() => {
     bottomSheetRef.current?.expand();
@@ -38,24 +41,18 @@ export default function TradeScreen() {
   const handleTabSelect = (tab: string) => {
     symbolBottomSheetRef.current?.snapToIndex(0);
 
-    setSelectedTab(tab);
-    if (tab === "ALTS") {
-      setSelectedSubTabs(["ETH"]);
-    } else if (tab === "FIAT") {
-      setSelectedSubTabs(["EUR"]);
-    } else {
-      setSelectedSubTabs([]);
-    }
+    setCoin((prev) => ({
+      ...prev,
+      selectedTab: tab,
+      selectedSubTabs: tab === "ALTS" ? ["ETH"] : tab === "FIAT" ? ["EUR"] : [],
+    }));
   };
 
   const handleSubTabSelect = (tab: string) => {
-    setSelectedSubTabs((prev) => {
-      if (prev.includes(tab)) {
-        return prev.filter((t) => t !== tab);
-      } else {
-        return [...prev, tab];
-      }
-    });
+    setCoin((prev) => ({
+      ...prev,
+      selectedSubTabs: prev.selectedSubTabs.includes(tab) ? prev.selectedSubTabs.filter((t) => t !== tab) : [...prev.selectedSubTabs, tab],
+    }));
   };
 
   return (
@@ -67,8 +64,10 @@ export default function TradeScreen() {
           <View className="px-4">
             <View className="flex-row justify-between items-center py-3">
               <TouchableOpacity className="flex-row items-center" onPress={handleSymbolPress}>
-                <Text className="text-xl font-bold mr-2">PENGU/USDT</Text>
-                <Text className="text-emerald-500">+0.67%</Text>
+                <Text className="text-xl font-bold mr-2">
+                  {coin.selectedCoin}/{coin.selectedPair}
+                </Text>
+                <Text className="text-emerald-500">{coin.priceChange}</Text>
               </TouchableOpacity>
               <View className="flex-row gap-4">
                 <MaterialIcons name="candlestick-chart" size={24} color="#666" />
@@ -200,36 +199,36 @@ export default function TradeScreen() {
                 </View>
               </View>
 
-              {/* Category Tabs */}
-              <View style={{ height: 50 }}>
+              {/* Main Category Tabs */}
+              <View className="border-b border-gray-100">
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} className="px-4">
                   <View className="flex-row">
                     {["Favorites", "USDT", "FDUSD", "USDC", "TUSD", "BNB", "BTC", "ALTS", "FIAT", "Zones"].map((tab) => (
                       <TouchableOpacity key={tab} onPress={() => handleTabSelect(tab)}>
-                        <Text className={`mr-6 pb-2 ${selectedTab === tab ? "text-yellow-500 border-b-2 border-yellow-500" : "text-gray-400"}`}>{tab}</Text>
+                        <Text className={`mr-6 pb-2 ${coin.selectedTab === tab ? "text-yellow-500 border-b-2 border-yellow-500" : "text-gray-400"}`}>{tab}</Text>
                       </TouchableOpacity>
                     ))}
                   </View>
                 </ScrollView>
               </View>
 
+              {/* Sub tabs for ALTS and FIAT */}
+              {(coin.selectedTab === "ALTS" || coin.selectedTab === "FIAT") && (
+                <View>
+                  <SubTabs tabs={coin.selectedTab === "ALTS" ? altsSubTabs : fiatSubTabs} selectedSubTabs={coin.selectedSubTabs} onSelectSubTab={handleSubTabSelect} />
+                </View>
+              )}
+
               {/* Column Headers */}
               <View style={{ height: 40 }} className="flex-row justify-between px-4 py-2">
                 <Text className="text-gray-400">Name / Vol</Text>
                 <Text className="text-gray-400">Last Price / 24h Change</Text>
               </View>
-
-              {/* Sub tabs for ALTS and FIAT */}
-              {(selectedTab === "ALTS" || selectedTab === "FIAT") && (
-                <View style={{ height: subTabsHeight }}>
-                  <SubTabs tabs={selectedTab === "ALTS" ? altsSubTabs : fiatSubTabs} selectedSubTabs={selectedSubTabs} onSelectSubTab={handleSubTabSelect} />
-                </View>
-              )}
             </View>
 
             {/* List Section */}
             <View style={{ flex: 1 }}>
-              <TradingPairsList selectedTab={selectedTab} selectedSubTabs={selectedSubTabs} onPairSelect={() => symbolBottomSheetRef.current?.close()} />
+              <TradingPairsList selectedTab={coin.selectedTab} selectedSubTabs={coin.selectedSubTabs} onPairSelect={() => symbolBottomSheetRef.current?.close()} />
             </View>
           </BottomSheetView>
         </BottomSheet>

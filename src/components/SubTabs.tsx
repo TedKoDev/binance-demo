@@ -9,14 +9,16 @@ interface SubTabsProps {
 
 export const SubTabs: React.FC<SubTabsProps> = ({ tabs, selectedSubTabs, onSelectSubTab }) => {
   return (
-    <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mb-4">
-      <View className="flex-row">
-        {tabs.map((tab) => (
-          <TouchableOpacity key={tab} onPress={() => onSelectSubTab(tab)}>
-            <Text className={`mr-6 pb-2 ${selectedSubTabs.includes(tab) ? "text-yellow-500 border-b-2 border-yellow-500" : "text-gray-400"}`}>{tab}</Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-    </ScrollView>
+    <View>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 16 }}>
+        <View className="flex-row items-center">
+          {tabs.map((tab) => (
+            <TouchableOpacity className="mr-6 my-3" key={tab} onPress={() => onSelectSubTab(tab)}>
+              <Text className={`text-sm ${selectedSubTabs.includes(tab) ? "text-yellow-500 border-b-2 border-yellow-500" : "text-gray-400"}`}>{tab}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </ScrollView>
+    </View>
   );
 };
