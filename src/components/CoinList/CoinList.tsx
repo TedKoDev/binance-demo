@@ -1,6 +1,6 @@
 import React from "react";
 import { View, FlatList, Text } from "react-native";
-import { useCoinList } from "../../hooks/useCoinList";
+import { useCoinList } from "../../hooks/queries/useCoinList";
 import { useRecoilState } from "recoil";
 import { coinState } from "../../atoms/coinAtom";
 

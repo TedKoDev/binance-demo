@@ -68,11 +68,9 @@ export const fetchKlines = async (symbol: string, interval: string, limit: numbe
   return data;
 };
 
-export const fetch24hrTicker = async (symbol: string): Promise<TickerData> => {
-  const response: AxiosResponse<TickerData> = await binanceApi.get("/ticker/24hr", {
-    params: {
-      symbol,
-    },
+export const fetch24hrTicker = async (symbol?: string): Promise<TickerData | TickerData[]> => {
+  const response: AxiosResponse<TickerData | TickerData[]> = await binanceApi.get("/ticker/24hr", {
+    params: symbol ? { symbol } : undefined,
   });
   return response.data;
 };

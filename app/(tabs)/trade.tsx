@@ -5,6 +5,8 @@ import { OrderBook } from "@/components/OrderBook/OrderBook";
 import { MaterialIcons, Ionicons } from "@expo/vector-icons";
 import BottomSheet, { BottomSheetView, BottomSheetBackdrop, BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { use24hrTicker, useCoinList } from "@/hooks/queries/useCoinList";
+import { TradingPairsList } from "@/components/TradingPairsList";
 
 export default function TradeScreen() {
   const [orderType, setOrderType] = useState("Limit");
@@ -12,12 +14,13 @@ export default function TradeScreen() {
   const [isSearchModalVisible, setIsSearchModalVisible] = useState(false);
   const [isOrderTypeSheetOpen, setIsOrderTypeSheetOpen] = useState(false);
   const bottomSheetRef = useRef<BottomSheet>(null);
-  const snapPoints = useMemo(() => ["90%"], []);
+  const snapPoints = useMemo(() => ["80%"], []);
   const [isSymbolSheetOpen, setIsSymbolSheetOpen] = useState(false);
   const symbolBottomSheetRef = useRef<BottomSheet>(null);
-  const symbolSnapPoints = useMemo(() => ["90%"], []);
+  const symbolSnapPoints = useMemo(() => ["80%"], []);
   const [refreshing, setRefreshing] = useState(false);
   const [selectedTab, setSelectedTab] = useState("USDT");
+  const { data: tickerData } = use24hrTicker();
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
@@ -36,20 +39,6 @@ export default function TradeScreen() {
   }, []);
 
   const renderBackdrop = useCallback((props: any) => <BottomSheetBackdrop {...props} disappearsOnIndex={-1} appearsOnIndex={0} opacity={0.5} pressBehavior="close" />, []);
-
-  const tradingPairs = useMemo(
-    () => [
-      { symbol: "PENGU", pair: "USDT", leverage: "5x", price: "0.042272", change: "+0.67%" },
-      { symbol: "BTC", pair: "USDT", leverage: "10x", price: "101,754.25", change: "+2.19%" },
-      { symbol: "ETH", pair: "USDT", leverage: "10x", price: "3,521.48", change: "-1.23%" },
-      { symbol: "BNB", pair: "USDT", leverage: "5x", price: "567.32", change: "+0.89%" },
-      { symbol: "SOL", pair: "USDT", leverage: "5x", price: "184.65", change: "+3.45%" },
-      { symbol: "XRP", pair: "USDT", leverage: "5x", price: "0.9873", change: "-0.56%" },
-      { symbol: "DOGE", pair: "USDT", leverage: "5x", price: "0.1234", change: "+1.23%" },
-      { symbol: "AVAX", pair: "USDT", leverage: "5x", price: "45.67", change: "-2.34%" },
-    ],
-    []
-  );
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
@@ -204,32 +193,7 @@ export default function TradeScreen() {
             </View>
 
             {/* Scrollable Trading Pairs List */}
-            <BottomSheetScrollView
-              bounces={true}
-              overScrollMode="never"
-              refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#999" />}
-              showsVerticalScrollIndicator={false}
-              style={{ flex: 1 }}
-            >
-              {tradingPairs.map((pair, index) => (
-                <TouchableOpacity key={index} className="flex-row items-center justify-between px-4 py-3 border-b border-gray-100" onPress={() => symbolBottomSheetRef.current?.close()}>
-                  <View>
-                    <View className="flex-row items-center">
-                      <Text className="text-base font-bold">{pair.symbol}</Text>
-                      <Text className="text-gray-400">/{pair.pair}</Text>
-                      <View className="ml-2 px-1 bg-gray-100 rounded">
-                        <Text className="text-gray-400 text-xs">{pair.leverage}</Text>
-                      </View>
-                    </View>
-                    <Text className="text-gray-400 text-sm">Vol {pair.symbol || "0"}</Text>
-                  </View>
-                  <View className="items-end">
-                    <Text className="text-base">{pair.price}</Text>
-                    <Text className={pair.change.startsWith("+") ? "text-emerald-500" : "text-red-500"}>{pair.change}</Text>
-                  </View>
-                </TouchableOpacity>
-              ))}
-            </BottomSheetScrollView>
+            <TradingPairsList selectedTab={selectedTab} onPairSelect={() => symbolBottomSheetRef.current?.close()} />
           </View>
         </BottomSheet>
       </SafeAreaView>
