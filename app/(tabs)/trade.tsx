@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo, useRef } from "react";
+import React, { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import { View, SafeAreaView, Text, TouchableOpacity, TextInput, ScrollView, RefreshControl, Pressable } from "react-native";
 import { TradeTypeMenu } from "@/components/TradeTypeMenu/TradeTypeMenu";
 import { OrderBook } from "@/components/OrderBook/OrderBook";
@@ -6,7 +6,6 @@ import { MaterialIcons, Ionicons } from "@expo/vector-icons";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import BottomSheet, { BottomSheetView, BottomSheetBackdrop, BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { use24hrTicker, useCoinList } from "@/hooks/queries/useCoinList";
 import { TradingPairsList } from "@/components/TradingPairsList";
 import { SubTabs } from "@/components/SubTabs";
 import { altsSubTabs, fiatSubTabs } from "@/constants/Tabs";
@@ -16,6 +15,8 @@ import { OrderType, ORDER_TYPES } from "@/constants/Types";
 import PriceInput from "@/components/PriceInput/PriceInput";
 import AmountInput from "@/components/AmountInput/AmountInput";
 import { symbolStepSizeSelector } from "@/atoms/exchangeInfo";
+import Slider from "@react-native-community/slider";
+import { ImageSourcePropType } from "react-native";
 
 export default function TradeScreen() {
   const [orderType, setOrderType] = useState<OrderType>("Limit");
@@ -30,6 +31,16 @@ export default function TradeScreen() {
 
   const [coin, setCoin] = useRecoilState(coinState);
   const stepSizes = useRecoilValue(symbolStepSizeSelector);
+  const [icon, setIcon] = useState<ImageSourcePropType>();
+  const [thumbIcon, setThumbIcon] = useState<ImageSourcePropType>();
+
+  useEffect(() => {
+    // MaterialIcons from @expo/vector-icons doesn't have getImageSource method
+    // Using Ionicons instead which has similar functionality
+    Ionicons.loadFont().then(() => {
+      setIcon({ uri: "circle" });
+    });
+  }, []);
 
   const handleOrderTypePress = () => {
     orderTypeBottomSheetRef.current?.expand();
@@ -110,8 +121,23 @@ export default function TradeScreen() {
               </View>
               {/* Price Input */}
               <PriceInput selectedPair={coin.selectedPair} />
+
               {/* Amount Input */}
               <AmountInput selectedCoin={coin.selectedCoin} stepSize={stepSizes[coin.selectedCoin] || 1} />
+              {/* Slider */}
+              <View className="mb-3">
+                <Slider
+                  style={{ width: "100%", height: 10 }}
+                  minimumValue={0}
+                  maximumValue={1}
+                  step={0.01}
+                  minimumTrackTintColor="#000000"
+                  maximumTrackTintColor="#E5E7EB"
+                  thumbTintColor="#000000"
+                  thumbImage={require("/Users/taeui/Desktop/dev/binance-demo/assets/images/Rectangle.png")}
+                />
+              </View>
+
               {/* Total */}
               <View className="bg-gray-100 rounded-lg mb-3">
                 <Text className="text-gray-400 text-sm px-4 pt-2">Total ({coin.selectedPair})</Text>
