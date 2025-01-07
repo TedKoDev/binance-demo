@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo, useRef, useEffect } from "react";
-import { View, SafeAreaView, Text, TouchableOpacity, TextInput, ScrollView, RefreshControl, Pressable } from "react-native";
+import { View, SafeAreaView, Text, TouchableOpacity, TextInput, ScrollView, RefreshControl, Pressable, Animated } from "react-native";
 import { TradeTypeMenu } from "@/components/TradeTypeMenu/TradeTypeMenu";
 import { OrderBook } from "@/components/OrderBook/OrderBook";
 import { MaterialIcons, Ionicons } from "@expo/vector-icons";
@@ -17,6 +17,7 @@ import AmountInput from "@/components/AmountInput/AmountInput";
 import { symbolStepSizeSelector } from "@/atoms/exchangeInfo";
 import Slider from "@react-native-community/slider";
 import { ImageSourcePropType } from "react-native";
+import { TotalInput } from "@/components/TotalInput/TotalInput";
 
 export default function TradeScreen() {
   const [orderType, setOrderType] = useState<OrderType>("Limit");
@@ -67,6 +68,25 @@ export default function TradeScreen() {
       ...prev,
       selectedSubTabs: prev.selectedSubTabs.includes(tab) ? prev.selectedSubTabs.filter((t) => t !== tab) : [...prev.selectedSubTabs, tab],
     }));
+  };
+
+  const [isFocused, setIsFocused] = useState(false);
+  const labelPosition = useRef(new Animated.Value(0)).current;
+  const labelSize = useRef(new Animated.Value(1)).current;
+
+  const animateLabel = (toFocused: boolean) => {
+    Animated.parallel([
+      Animated.timing(labelPosition, {
+        toValue: toFocused ? -1 : 0,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+      Animated.timing(labelSize, {
+        toValue: toFocused ? 0.85 : 1,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+    ]).start();
   };
 
   return (
@@ -139,37 +159,45 @@ export default function TradeScreen() {
               </View>
 
               {/* Total */}
-              <View className="bg-gray-100 rounded-lg mb-3">
-                <Text className="text-gray-400 text-sm px-4 pt-2">Total ({coin.selectedPair})</Text>
-                <Text className="text-center py-2 text-gray-400">--</Text>
-              </View>
-              {/* TP/SL */}
-              <View className="flex-row justify-between items-center mb-3">
+              <TotalInput selectedPair={coin.selectedPair} />
+              {/* TP/SL & Iceberg */}
+              <View className="mb-3">
+                <View className="flex-row items-center mb-2">
+                  <TouchableOpacity className="mr-2">
+                    <MaterialIcons name="check-box-outline-blank" size={20} color="#999" />
+                  </TouchableOpacity>
+                  <Text className="text-gray-500 text-sm">TP/SL</Text>
+                </View>
                 <View className="flex-row items-center">
                   <TouchableOpacity className="mr-2">
-                    <MaterialIcons name="check-box-outline-blank" size={24} color="#999" />
+                    <MaterialIcons name="check-box-outline-blank" size={20} color="#999" />
                   </TouchableOpacity>
-                  <Text className="text-gray-700">TP/SL</Text>
+                  <Text className="text-gray-500 text-sm">Iceberg</Text>
                 </View>
-                <TouchableOpacity className="flex-row items-center">
-                  <Text className="text-gray-700 mr-1">Advanced</Text>
-                  <MaterialIcons name="keyboard-arrow-down" size={24} color="#999" />
-                </TouchableOpacity>
-              </View>
-              {/* Iceberg */}
-              <View className="flex-row items-center mb-3">
-                <TouchableOpacity className="mr-2">
-                  <MaterialIcons name="check-box-outline-blank" size={24} color="#999" />
-                </TouchableOpacity>
-                <Text className="text-gray-700">Iceberg</Text>
               </View>
 
-              {/* Market/Limit Toggle */}
-              <View className="flex-row justify-center">
-                <View className="border border-gray-300 rounded-lg">
-                  <Text className="px-4 py-2">Market</Text>
+              {/* Trade Info */}
+              <View className="mb-4">
+                <View className="flex-row justify-between mb-1">
+                  <Text className="text-gray-500 text-sm">Avbl</Text>
+                  <Text className="text-gray-700">0 {coin.selectedPair}</Text>
+                </View>
+                <View className="flex-row justify-between mb-1">
+                  <Text className="text-gray-500 text-sm">Max Buy</Text>
+                  <Text className="text-gray-700">0 {coin.selectedCoin}</Text>
+                </View>
+                <View className="flex-row justify-between">
+                  <Text className="text-gray-500 text-sm">Est. Fee</Text>
+                  <Text className="text-gray-700">-- {coin.selectedPair}</Text>
                 </View>
               </View>
+
+              {/* Buy or Sell Button */}
+              <TouchableOpacity className={`${tradeType === "buy" ? "bg-emerald-500" : "bg-red-500"} rounded-lg py-3 items-center`}>
+                <Text className="text-white font-medium">
+                  {tradeType === "buy" ? "Buy" : "Sell"} {coin.selectedCoin}
+                </Text>
+              </TouchableOpacity>
             </View>
 
             {/* Right side - Order Book */}
