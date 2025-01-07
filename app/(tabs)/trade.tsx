@@ -8,6 +8,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { use24hrTicker, useCoinList } from "@/hooks/queries/useCoinList";
 import { TradingPairsList } from "@/components/TradingPairsList";
 import { SubTabs } from "@/components/SubTabs";
+import { altsSubTabs, fiatSubTabs } from "@/constants/Tabs";
 
 export default function TradeScreen() {
   const [orderType, setOrderType] = useState("Limit");
@@ -21,10 +22,8 @@ export default function TradeScreen() {
   const [selectedTab, setSelectedTab] = useState("USDT");
   const [selectedSubTabs, setSelectedSubTabs] = useState<string[]>(["ETH"]);
   const { data: tickerData } = use24hrTicker();
-
-  // ALTS와 FIAT의 하위 탭 정의
-  const altsSubTabs = ["ETH", "DAI", "XRP", "TRX", "DOGE", "EURI", "SOL"];
-  const fiatSubTabs = ["EUR", "TRY", "GBP", "AUD", "BRL", "RUB"];
+  const headerHeight = 180; // 기본 헤더 높이
+  const subTabsHeight = 50; // 서브탭 높이
 
   const handleOrderTypePress = useCallback(() => {
     bottomSheetRef.current?.expand();
@@ -37,14 +36,15 @@ export default function TradeScreen() {
   const renderBackdrop = useCallback((props: any) => <BottomSheetBackdrop {...props} disappearsOnIndex={-1} appearsOnIndex={0} opacity={0.5} pressBehavior="close" />, []);
 
   const handleTabSelect = (tab: string) => {
+    symbolBottomSheetRef.current?.snapToIndex(0);
+
     setSelectedTab(tab);
-    // 메인 탭이 변경될 때 하위 탭 초기화
     if (tab === "ALTS") {
-      setSelectedSubTabs(["ETH"]); // ALTS의 기본값
+      setSelectedSubTabs(["ETH"]);
     } else if (tab === "FIAT") {
-      setSelectedSubTabs(["EUR"]); // FIAT의 기본값
+      setSelectedSubTabs(["EUR"]);
     } else {
-      setSelectedSubTabs([]); // 다른 탭의 경우 빈 배열로 초기화
+      setSelectedSubTabs([]);
     }
   };
 
@@ -177,45 +177,61 @@ export default function TradeScreen() {
             setIsSymbolSheetOpen(index >= 0);
           }}
           enableContentPanningGesture={false}
+          enableDynamicSizing={false}
           handleComponent={() => (
             <View className="w-full items-center pt-2 pb-4">
               <View className="w-8 h-1 rounded-full bg-gray-300" />
             </View>
           )}
         >
-          <View style={{ flex: 1, backgroundColor: "white" }}>
-            {/* Fixed Search Header */}
-            <View style={{ padding: 16 }}>
+          <BottomSheetView style={{ flex: 1 }}>
+            {/* Fixed Header Section */}
+            <View
+              style={{
+                backgroundColor: "white",
+                zIndex: 1,
+              }}
+            >
               {/* Search Input */}
-              <View className="flex-row items-center bg-gray-100 rounded-lg px-4 py-3 mb-4">
-                <MaterialIcons name="search" size={24} color="#999" />
-                <TextInput className="flex-1 ml-2 text-base" placeholder="Search" placeholderTextColor="#999" />
+              <View style={{ height: 70 }} className="px-4 py-3">
+                <View className="flex-row items-center bg-gray-100 rounded-lg px-4 py-3">
+                  <MaterialIcons name="search" size={24} color="#999" />
+                  <TextInput className="flex-1 ml-2 text-base" placeholder="Search" placeholderTextColor="#999" />
+                </View>
               </View>
 
               {/* Category Tabs */}
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mb-4">
-                <View className="flex-row">
-                  {["Favorites", "USDT", "FDUSD", "USDC", "TUSD", "BNB", "BTC", "ALTS", "FIAT", "Zones"].map((tab) => (
-                    <TouchableOpacity key={tab} onPress={() => handleTabSelect(tab)}>
-                      <Text className={`mr-6 pb-2 ${selectedTab === tab ? "text-yellow-500 border-b-2 border-yellow-500" : "text-gray-400"}`}>{tab}</Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </ScrollView>
+              <View style={{ height: 50 }}>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} className="px-4">
+                  <View className="flex-row">
+                    {["Favorites", "USDT", "FDUSD", "USDC", "TUSD", "BNB", "BTC", "ALTS", "FIAT", "Zones"].map((tab) => (
+                      <TouchableOpacity key={tab} onPress={() => handleTabSelect(tab)}>
+                        <Text className={`mr-6 pb-2 ${selectedTab === tab ? "text-yellow-500 border-b-2 border-yellow-500" : "text-gray-400"}`}>{tab}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </ScrollView>
+              </View>
 
               {/* Column Headers */}
-              <View className="flex-row justify-between px-4">
+              <View style={{ height: 40 }} className="flex-row justify-between px-4 py-2">
                 <Text className="text-gray-400">Name / Vol</Text>
                 <Text className="text-gray-400">Last Price / 24h Change</Text>
               </View>
+
+              {/* Sub tabs for ALTS and FIAT */}
+              {(selectedTab === "ALTS" || selectedTab === "FIAT") && (
+                <View style={{ height: subTabsHeight }}>
+                  <SubTabs tabs={selectedTab === "ALTS" ? altsSubTabs : fiatSubTabs} selectedSubTabs={selectedSubTabs} onSelectSubTab={handleSubTabSelect} />
+                </View>
+              )}
             </View>
 
-            {/* Sub tabs for ALTS and FIAT */}
-            {selectedTab === "ALTS" && <SubTabs tabs={altsSubTabs} selectedSubTabs={selectedSubTabs} onSelectSubTab={handleSubTabSelect} />}
-            {selectedTab === "FIAT" && <SubTabs tabs={fiatSubTabs} selectedSubTabs={selectedSubTabs} onSelectSubTab={handleSubTabSelect} />}
-
-            <TradingPairsList selectedTab={selectedTab} selectedSubTabs={selectedSubTabs} onPairSelect={() => symbolBottomSheetRef.current?.close()} />
-          </View>
+            {/* List Section */}
+            <View style={{ flex: 1 }}>
+              <TradingPairsList selectedTab={selectedTab} selectedSubTabs={selectedSubTabs} onPairSelect={() => symbolBottomSheetRef.current?.close()} />
+            </View>
+          </BottomSheetView>
         </BottomSheet>
       </SafeAreaView>
     </GestureHandlerRootView>
