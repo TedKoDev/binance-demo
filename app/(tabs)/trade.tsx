@@ -17,6 +17,7 @@ export default function TradeScreen() {
   const symbolBottomSheetRef = useRef<BottomSheet>(null);
   const symbolSnapPoints = useMemo(() => ["90%"], []);
   const [refreshing, setRefreshing] = useState(false);
+  const [selectedTab, setSelectedTab] = useState("USDT");
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
@@ -35,21 +36,6 @@ export default function TradeScreen() {
   }, []);
 
   const renderBackdrop = useCallback((props: any) => <BottomSheetBackdrop {...props} disappearsOnIndex={-1} appearsOnIndex={0} opacity={0.5} pressBehavior="close" />, []);
-
-  // Add sample data
-  const orderTypes = useMemo(
-    () => [
-      { id: "limit", name: "Limit", description: "Place an order at a specific price" },
-      { id: "market", name: "Market", description: "Execute immediately at market price" },
-      { id: "stop_limit", name: "Stop Limit", description: "Place a limit order when price reaches trigger" },
-      { id: "stop_market", name: "Stop Market", description: "Place a market order when price reaches trigger" },
-      { id: "trailing_stop", name: "Trailing Stop", description: "Stop price follows market price" },
-      { id: "post_only", name: "Post Only", description: "Ensure maker orders only" },
-      { id: "fok", name: "Fill or Kill", description: "Execute entirely or cancel" },
-      { id: "ioc", name: "Immediate or Cancel", description: "Execute what's available and cancel the rest" },
-    ],
-    []
-  );
 
   const tradingPairs = useMemo(
     () => [
@@ -156,7 +142,7 @@ export default function TradeScreen() {
                 </TouchableOpacity>
                 <Text className="text-gray-700">Iceberg</Text>
               </View>
-              never
+
               {/* Market/Limit Toggle */}
               <View className="flex-row justify-center">
                 <View className="border border-gray-300 rounded-lg">
@@ -202,12 +188,11 @@ export default function TradeScreen() {
               {/* Category Tabs */}
               <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mb-4">
                 <View className="flex-row">
-                  <Text className="text-gray-400 mr-6">Favorites</Text>
-                  <Text className="text-yellow-500 mr-6 border-b-2 border-yellow-500 pb-2">USDT</Text>
-                  <Text className="text-gray-400 mr-6">FDUSD</Text>
-                  <Text className="text-gray-400 mr-6">USDC</Text>
-                  <Text className="text-gray-400 mr-6">TUSD</Text>
-                  <Text className="text-gray-400 mr-6">BNB</Text>
+                  {["Favorites", "USDT", "FDUSD", "USDC", "TUSD", "BNB", "BTC", "ALTS", "FIAT", "Zones"].map((tab) => (
+                    <TouchableOpacity key={tab} onPress={() => setSelectedTab(tab)}>
+                      <Text className={`mr-6 pb-2 ${selectedTab === tab ? "text-yellow-500 border-b-2 border-yellow-500" : "text-gray-400"}`}>{tab}</Text>
+                    </TouchableOpacity>
+                  ))}
                 </View>
               </ScrollView>
 

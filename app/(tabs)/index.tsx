@@ -18,7 +18,7 @@ const App = () => {
   const snapPoints = useMemo(() => ["80%"], []);
 
   // callbacks
-  const handleSheetChange = useCallback((index) => {
+  const handleSheetChange = useCallback((index: number) => {
     console.log("handleSheetChange", index);
   }, []);
   const handleClosePress = useCallback(() => {
@@ -27,7 +27,7 @@ const App = () => {
 
   // render
   const renderItem = useCallback(
-    (item) => (
+    (item: string) => (
       <View key={item} style={styles.itemContainer}>
         <Text>{item}</Text>
       </View>
