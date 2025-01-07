@@ -8,6 +8,10 @@ Binance API 또는 Mock 데이터를 사용하여 코인 목록을 표시.
 
 API : https://api.binance.com/api/v3/exchangeInfo
 
+(1-1) 24시간 기준 가격변동
+
+API : https://api.binance.com/api/v3/ticker/24hr
+
 (2) Orderbook 기능
 호가창에서 매수/매도 가격 데이터를 표시.
 호가창의 특정 가격을 클릭하면 입력 필드에 선택된 가격이 적용.
