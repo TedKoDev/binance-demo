@@ -7,6 +7,7 @@ export interface CoinState {
   searchQuery: string;
   selectedTab: string;
   selectedSubTabs: string[];
+  isBuy: boolean;
 }
 
 export const coinState = atom<CoinState>({
@@ -18,5 +19,6 @@ export const coinState = atom<CoinState>({
     searchQuery: "",
     selectedTab: "USDT",
     selectedSubTabs: ["ETH"],
+    isBuy: true,
   },
 });

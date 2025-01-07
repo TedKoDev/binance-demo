@@ -1,8 +1,9 @@
 import React, { useState, useCallback, useMemo, useRef } from "react";
-import { View, SafeAreaView, Text, TouchableOpacity, TextInput, ScrollView, RefreshControl } from "react-native";
+import { View, SafeAreaView, Text, TouchableOpacity, TextInput, ScrollView, RefreshControl, Pressable } from "react-native";
 import { TradeTypeMenu } from "@/components/TradeTypeMenu/TradeTypeMenu";
 import { OrderBook } from "@/components/OrderBook/OrderBook";
 import { MaterialIcons, Ionicons } from "@expo/vector-icons";
+import AntDesign from "@expo/vector-icons/AntDesign";
 import BottomSheet, { BottomSheetView, BottomSheetBackdrop, BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { use24hrTicker, useCoinList } from "@/hooks/queries/useCoinList";
@@ -11,30 +12,29 @@ import { SubTabs } from "@/components/SubTabs";
 import { altsSubTabs, fiatSubTabs } from "@/constants/Tabs";
 import { useRecoilState } from "recoil";
 import { coinState } from "@/atoms/coinAtom";
+import { OrderType, ORDER_TYPES } from "@/constants/Types";
+import PriceInput from "@/components/PriceInput/PriceInput";
 
 export default function TradeScreen() {
-  const [orderType, setOrderType] = useState("Limit");
-  const [isBuy, setIsBuy] = useState(true);
-  const bottomSheetRef = useRef<BottomSheet>(null);
-  const snapPoints = useMemo(() => ["80%"], []);
+  const [orderType, setOrderType] = useState<OrderType>("Limit");
+  const [tradeType, setTradeType] = useState<"buy" | "sell">("buy");
+  const orderTypeBottomSheetRef = useRef<BottomSheet>(null);
+  const orderTypeSnapPoints = useMemo(() => ["80%"], []);
+  const [isOrderTypeSheetOpen, setIsOrderTypeSheetOpen] = useState(false);
+
   const [isSymbolSheetOpen, setIsSymbolSheetOpen] = useState(false);
   const symbolBottomSheetRef = useRef<BottomSheet>(null);
   const symbolSnapPoints = useMemo(() => ["80%"], []);
-  const [refreshing, setRefreshing] = useState(false);
+
   const [coin, setCoin] = useRecoilState(coinState);
 
-  console.log(coin);
-  // const { data: tickerData } = use24hrTicker();
-  // const headerHeight = 180; // 기본 헤더 높이
-  // const subTabsHeight = 50; // 서브탭 높이
+  const handleOrderTypePress = () => {
+    orderTypeBottomSheetRef.current?.expand();
+  };
 
-  const handleOrderTypePress = useCallback(() => {
-    bottomSheetRef.current?.expand();
-  }, []);
-
-  const handleSymbolPress = useCallback(() => {
+  const handleSymbolPress = () => {
     symbolBottomSheetRef.current?.expand();
-  }, []);
+  };
 
   const renderBackdrop = useCallback((props: any) => <BottomSheetBackdrop {...props} disappearsOnIndex={-1} appearsOnIndex={0} opacity={0.5} pressBehavior="close" />, []);
 
@@ -63,12 +63,20 @@ export default function TradeScreen() {
           <View className="border-b border-gray-200"></View>
           <View className="px-4">
             <View className="flex-row justify-between items-center py-3">
-              <TouchableOpacity className="flex-row items-center" onPress={handleSymbolPress}>
-                <Text className="text-xl font-bold mr-2">
-                  {coin.selectedCoin}/{coin.selectedPair}
+              <View className="flex-1   items-start">
+                <TouchableOpacity className="flex-row items-center" onPress={handleSymbolPress}>
+                  <Text className="text-xl font-bold mr-2">
+                    {coin.selectedCoin}/{coin.selectedPair}
+                  </Text>
+                  <AntDesign name="caretdown" size={12} color="#000" />
+                </TouchableOpacity>
+                <Text
+                  className="flex-start  flex-1 
+                text-emerald-500"
+                >
+                  {coin.priceChange}
                 </Text>
-                <Text className="text-emerald-500">{coin.priceChange}</Text>
-              </TouchableOpacity>
+              </View>
               <View className="flex-row gap-4">
                 <MaterialIcons name="candlestick-chart" size={24} color="#666" />
                 <MaterialIcons name="more-vert" size={24} color="#666" />
@@ -82,37 +90,26 @@ export default function TradeScreen() {
             <View className="flex-1 px-4">
               {/* Buy/Sell Toggle */}
               <View className="flex-row bg-gray-100 rounded-lg mb-4">
-                <TouchableOpacity className={`flex-1 py-3 rounded-lg ${isBuy ? "bg-emerald-500" : ""}`} onPress={() => setIsBuy(true)}>
-                  <Text className={`text-center font-semibold ${isBuy ? "text-white" : "text-gray-500"}`}>Buy</Text>
-                </TouchableOpacity>
-                <TouchableOpacity className={`flex-1 py-3 rounded-lg ${!isBuy ? "bg-red-500" : ""}`} onPress={() => setIsBuy(false)}>
-                  <Text className={`text-center font-semibold ${!isBuy ? "text-white" : "text-gray-500"}`}>Sell</Text>
-                </TouchableOpacity>
+                <Pressable className={`flex-1 py-2 rounded-lg ${tradeType === "buy" ? "bg-emerald-500" : ""}`} onPress={() => setTradeType("buy")}>
+                  <Text className={`text-center font-bold ${tradeType === "buy" ? "text-white" : "text-gray-500"}`}>Buy</Text>
+                </Pressable>
+                <Pressable className={`flex-1 py-2 rounded-lg ${tradeType === "sell" ? "bg-red-500" : ""}`} onPress={() => setTradeType("sell")}>
+                  <Text className={`text-center font-bold ${tradeType === "sell" ? "text-white" : "text-gray-500"}`}>Sell</Text>
+                </Pressable>
               </View>
               {/* Limit Order Type */}
               <View className="flex-row items-center mb-3">
-                <Ionicons name="information-circle-outline" size={20} color="#999" />
-                <TouchableOpacity className="flex-1 flex-row items-center" onPress={handleOrderTypePress}>
-                  <Text className="flex-1 ml-2 text-gray-700">{orderType}</Text>
-                  <MaterialIcons name="keyboard-arrow-down" size={24} color="#999" />
-                </TouchableOpacity>
+                <Pressable className="flex-1 flex-row items-center bg-gray-100 rounded-lg py-3 px-4" onPress={handleOrderTypePress}>
+                  <Ionicons name="information-circle" size={20} color="#999" />
+                  <Text className="flex-1 text-center text-black">{orderType}</Text>
+                  <AntDesign name="caretdown" size={12} color="#999" />
+                </Pressable>
               </View>
               {/* Price Input */}
-              <View className="bg-gray-50 rounded-lg mb-3">
-                <Text className="text-gray-400 text-sm px-2 pt-2">Price (USDT)</Text>
-                <View className="flex-row items-center px-2">
-                  <TouchableOpacity className="p-2">
-                    <Text className="text-gray-400">-</Text>
-                  </TouchableOpacity>
-                  <TextInput className="flex-1 text-center" value="0.042272" keyboardType="numeric" />
-                  <TouchableOpacity className="p-2">
-                    <Text className="text-gray-400">+</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
+              <PriceInput selectedPair={coin.selectedPair} />
               {/* Amount Input */}
-              <View className="bg-gray-50 rounded-lg mb-3">
-                <Text className="text-gray-400 text-sm px-2 pt-2">Amount (PENGU)</Text>
+              <View className="bg-gray-100 rounded-lg mb-3">
+                <Text className="text-gray-400 text-sm px-2 pt-2">Amount ({coin.selectedCoin})</Text>
                 <View className="flex-row items-center px-2">
                   <TouchableOpacity className="p-2">
                     <Text className="text-gray-400">-</Text>
@@ -124,8 +121,8 @@ export default function TradeScreen() {
                 </View>
               </View>
               {/* Total */}
-              <View className="bg-gray-50 rounded-lg mb-3">
-                <Text className="text-gray-400 text-sm px-4 pt-2">Total (USDT)</Text>
+              <View className="bg-gray-100 rounded-lg mb-3">
+                <Text className="text-gray-400 text-sm px-4 pt-2">Total ({coin.selectedPair})</Text>
                 <Text className="text-center py-2 text-gray-400">--</Text>
               </View>
               {/* TP/SL */}
@@ -163,6 +160,37 @@ export default function TradeScreen() {
             </View>
           </View>
         </ScrollView>
+
+        {/* Order Type Bottom Sheet */}
+        <BottomSheet
+          ref={orderTypeBottomSheetRef}
+          index={-1}
+          snapPoints={orderTypeSnapPoints}
+          enablePanDownToClose={true}
+          enableOverDrag={false}
+          backdropComponent={renderBackdrop}
+          onChange={(index) => {
+            setIsOrderTypeSheetOpen(index >= 0);
+          }}
+        >
+          <BottomSheetView style={{ flex: 1 }}>
+            <View className="p-4">
+              <Text className="text-lg font-bold mb-4">Order Type</Text>
+              {ORDER_TYPES.map((type) => (
+                <TouchableOpacity
+                  key={type}
+                  className={`py-3 px-4 ${orderType === type ? "bg-gray-100" : ""}`}
+                  onPress={() => {
+                    setOrderType(type);
+                    orderTypeBottomSheetRef.current?.close();
+                  }}
+                >
+                  <Text className={`${orderType === type ? "text-yellow-500" : "text-gray-700"}`}>{type}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </BottomSheetView>
+        </BottomSheet>
 
         {/* Symbol Selection Bottom Sheet */}
         <BottomSheet

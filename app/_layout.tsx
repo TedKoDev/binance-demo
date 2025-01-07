@@ -34,19 +34,19 @@ export default function RootLayout() {
   const queryClient = new QueryClient();
 
   return (
-    <ThemeProvider value={DefaultTheme}>
-      <GestureHandlerRootView style={styles.container}>
-        <QueryClientProvider client={queryClient}>
-          <RecoilRoot>
-            <StatusBar style="auto" />
-            <Stack>
-              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-              <Stack.Screen name="+not-found" />
-            </Stack>
-          </RecoilRoot>
-        </QueryClientProvider>
-      </GestureHandlerRootView>
-    </ThemeProvider>
+    // <ThemeProvider value={DefaultTheme}>
+    <GestureHandlerRootView style={styles.container}>
+      <QueryClientProvider client={queryClient}>
+        <RecoilRoot>
+          <StatusBar style="auto" />
+          <Stack>
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="+not-found" />
+          </Stack>
+        </RecoilRoot>
+      </QueryClientProvider>
+    </GestureHandlerRootView>
+    // </ThemeProvider>
   );
 }
 
