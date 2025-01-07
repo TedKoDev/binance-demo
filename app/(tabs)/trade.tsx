@@ -7,12 +7,11 @@ import BottomSheet, { BottomSheetView, BottomSheetBackdrop, BottomSheetScrollVie
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { use24hrTicker, useCoinList } from "@/hooks/queries/useCoinList";
 import { TradingPairsList } from "@/components/TradingPairsList";
+import { SubTabs } from "@/components/SubTabs";
 
 export default function TradeScreen() {
   const [orderType, setOrderType] = useState("Limit");
   const [isBuy, setIsBuy] = useState(true);
-  const [isSearchModalVisible, setIsSearchModalVisible] = useState(false);
-  const [isOrderTypeSheetOpen, setIsOrderTypeSheetOpen] = useState(false);
   const bottomSheetRef = useRef<BottomSheet>(null);
   const snapPoints = useMemo(() => ["80%"], []);
   const [isSymbolSheetOpen, setIsSymbolSheetOpen] = useState(false);
@@ -20,15 +19,12 @@ export default function TradeScreen() {
   const symbolSnapPoints = useMemo(() => ["80%"], []);
   const [refreshing, setRefreshing] = useState(false);
   const [selectedTab, setSelectedTab] = useState("USDT");
+  const [selectedSubTabs, setSelectedSubTabs] = useState<string[]>(["ETH"]);
   const { data: tickerData } = use24hrTicker();
 
-  const onRefresh = useCallback(() => {
-    setRefreshing(true);
-    // 여기에 데이터를 새로고침하는 로직을 추가하세요
-    setTimeout(() => {
-      setRefreshing(false);
-    }, 2000);
-  }, []);
+  // ALTS와 FIAT의 하위 탭 정의
+  const altsSubTabs = ["ETH", "DAI", "XRP", "TRX", "DOGE", "EURI", "SOL"];
+  const fiatSubTabs = ["EUR", "TRY", "GBP", "AUD", "BRL", "RUB"];
 
   const handleOrderTypePress = useCallback(() => {
     bottomSheetRef.current?.expand();
@@ -39,6 +35,28 @@ export default function TradeScreen() {
   }, []);
 
   const renderBackdrop = useCallback((props: any) => <BottomSheetBackdrop {...props} disappearsOnIndex={-1} appearsOnIndex={0} opacity={0.5} pressBehavior="close" />, []);
+
+  const handleTabSelect = (tab: string) => {
+    setSelectedTab(tab);
+    // 메인 탭이 변경될 때 하위 탭 초기화
+    if (tab === "ALTS") {
+      setSelectedSubTabs(["ETH"]); // ALTS의 기본값
+    } else if (tab === "FIAT") {
+      setSelectedSubTabs(["EUR"]); // FIAT의 기본값
+    } else {
+      setSelectedSubTabs([]); // 다른 탭의 경우 빈 배열로 초기화
+    }
+  };
+
+  const handleSubTabSelect = (tab: string) => {
+    setSelectedSubTabs((prev) => {
+      if (prev.includes(tab)) {
+        return prev.filter((t) => t !== tab);
+      } else {
+        return [...prev, tab];
+      }
+    });
+  };
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
@@ -178,7 +196,7 @@ export default function TradeScreen() {
               <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mb-4">
                 <View className="flex-row">
                   {["Favorites", "USDT", "FDUSD", "USDC", "TUSD", "BNB", "BTC", "ALTS", "FIAT", "Zones"].map((tab) => (
-                    <TouchableOpacity key={tab} onPress={() => setSelectedTab(tab)}>
+                    <TouchableOpacity key={tab} onPress={() => handleTabSelect(tab)}>
                       <Text className={`mr-6 pb-2 ${selectedTab === tab ? "text-yellow-500 border-b-2 border-yellow-500" : "text-gray-400"}`}>{tab}</Text>
                     </TouchableOpacity>
                   ))}
@@ -192,8 +210,11 @@ export default function TradeScreen() {
               </View>
             </View>
 
-            {/* Scrollable Trading Pairs List */}
-            <TradingPairsList selectedTab={selectedTab} onPairSelect={() => symbolBottomSheetRef.current?.close()} />
+            {/* Sub tabs for ALTS and FIAT */}
+            {selectedTab === "ALTS" && <SubTabs tabs={altsSubTabs} selectedSubTabs={selectedSubTabs} onSelectSubTab={handleSubTabSelect} />}
+            {selectedTab === "FIAT" && <SubTabs tabs={fiatSubTabs} selectedSubTabs={selectedSubTabs} onSelectSubTab={handleSubTabSelect} />}
+
+            <TradingPairsList selectedTab={selectedTab} selectedSubTabs={selectedSubTabs} onPairSelect={() => symbolBottomSheetRef.current?.close()} />
           </View>
         </BottomSheet>
       </SafeAreaView>

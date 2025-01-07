@@ -8,12 +8,13 @@ import { TickerData } from "@/api/binance";
 
 interface TradingPairsListProps {
   selectedTab: string;
+  selectedSubTabs: string[];
   onPairSelect: () => void;
 }
 
-export const TradingPairsList: React.FC<TradingPairsListProps> = ({ selectedTab, onPairSelect }) => {
+export const TradingPairsList: React.FC<TradingPairsListProps> = ({ selectedTab, selectedSubTabs, onPairSelect }) => {
   const { data: tickerData } = use24hrTicker();
-  const filteredPairs = useFilteredTradingPairs(tickerData as TickerData[], selectedTab);
+  const filteredPairs = useFilteredTradingPairs(tickerData as TickerData[], selectedTab, selectedSubTabs);
 
   return (
     <BottomSheetScrollView>

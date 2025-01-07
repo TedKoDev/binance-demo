@@ -38,3 +38,7 @@ npm install nativewind tailwindcss react-native-reanimated react-native-safe-are
 ## bottom-sheet으로 바텀 슬라이드 모달
 
 expo install @gorhom/bottom-sheet react-native-reanimated react-native-gesture-handler
+
+## 특이사항
+
+1. zones에 따른 코인정보는 API가 없음
