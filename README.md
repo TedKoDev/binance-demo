@@ -20,5 +20,17 @@ React Native에서 사용할 수 있는 차트 라이브러리 사용.
 
 사용 라이브러리 :  
 https://github.com/coinjar/react-native-wagmi-charts
+npm install react-native-wagmi-charts
 
 시간 간격 (1분, 15분, 1시간 등)을 기준으로 데이터를 표시.
+
+##필요 라이브러리 설치
+npx expo install @tanstack/react-query recoil axios @tanstack/react-query-devtools
+
+## NativeWind for CSS
+
+npm install nativewind tailwindcss react-native-reanimated react-native-safe-area-context
+
+## bottom-sheet으로 바텀 슬라이드 모달
+
+expo install @gorhom/bottom-sheet react-native-reanimated react-native-gesture-handler

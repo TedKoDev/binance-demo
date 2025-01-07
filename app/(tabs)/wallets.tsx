@@ -1,9 +1,9 @@
 import { StyleSheet, Image, Platform, View, Text } from "react-native";
 
-export default function TabTwoScreen() {
+export default function WalletsScreen() {
   return (
     <View style={styles.container}>
-      <Text>Explore</Text>
+      <Text>Wallets</Text>
     </View>
   );
 }
