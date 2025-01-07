@@ -13,7 +13,7 @@ export const TotalInput = ({ selectedPair }: TotalInputProps) => {
   const animateLabel = (toFocused: boolean) => {
     Animated.timing(labelAnimation, {
       toValue: toFocused ? 1 : 0,
-      duration: 200,
+      duration: 50,
       useNativeDriver: true,
     }).start();
   };
@@ -29,7 +29,7 @@ export const TotalInput = ({ selectedPair }: TotalInputProps) => {
       {
         translateY: labelAnimation.interpolate({
           inputRange: [0, 1],
-          outputRange: [0, -12],
+          outputRange: [0, -10],
         }),
       },
       {
@@ -55,7 +55,7 @@ export const TotalInput = ({ selectedPair }: TotalInputProps) => {
         </Animated.Text>
         {isFocused ? (
           <TextInput
-            className="text-gray-900 mt-1 text-center w-full"
+            className="text-gray-900 mt-10 text-center w-full"
             keyboardType="numeric"
             value={value}
             onChangeText={setValue}

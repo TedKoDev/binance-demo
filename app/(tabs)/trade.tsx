@@ -140,10 +140,11 @@ export default function TradeScreen() {
                 </Pressable>
               </View>
               {/* Price Input */}
-              <PriceInput selectedPair={coin.selectedPair} />
+              <PriceInput selectedPair={coin.selectedPair} selectedCoin={coin.selectedCoin} />
 
               {/* Amount Input */}
-              <AmountInput selectedCoin={coin.selectedCoin} stepSize={stepSizes[coin.selectedCoin] || 1} />
+              <AmountInput selectedCoin={coin.selectedCoin} stepSize={stepSizes[coin.selectedCoin]?.amount} />
+
               {/* Slider */}
               <View className="mb-3">
                 <Slider

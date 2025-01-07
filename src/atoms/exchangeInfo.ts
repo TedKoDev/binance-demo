@@ -13,12 +13,17 @@ export const symbolStepSizeSelector = selector({
     const exchangeInfo = get(exchangeInfoState);
     if (!exchangeInfo) return {};
 
-    const stepSizes: { [key: string]: number } = {};
+    const stepSizes: { [key: string]: { price: number; amount: number } } = {};
 
     exchangeInfo.symbols.forEach((symbol) => {
+      const priceFilter = symbol.filters.find((filter) => filter.filterType === "PRICE_FILTER");
       const lotSizeFilter = symbol.filters.find((filter) => filter.filterType === "LOT_SIZE");
-      if (lotSizeFilter?.stepSize) {
-        stepSizes[symbol.baseAsset] = parseFloat(lotSizeFilter.stepSize);
+
+      if (priceFilter?.tickSize && lotSizeFilter?.stepSize) {
+        stepSizes[symbol.baseAsset] = {
+          price: parseFloat(priceFilter.tickSize),
+          amount: parseFloat(lotSizeFilter.stepSize),
+        };
       }
     });
 

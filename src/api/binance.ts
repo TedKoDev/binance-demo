@@ -59,7 +59,7 @@ export const fetchOrderBook = async (symbol: string): Promise<OrderBookData> => 
   const response: AxiosResponse<OrderBookData> = await binanceApi.get("/depth", {
     params: {
       symbol,
-      limit: 10,
+      limit: 13,
     },
   });
   return response.data;

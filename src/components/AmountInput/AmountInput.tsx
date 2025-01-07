@@ -1,5 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, TextInput, Pressable } from "react-native";
+import { useRecoilValue } from "recoil";
+import { symbolStepSizeSelector } from "../../atoms/exchangeInfo";
 
 interface AmountInputProps {
   selectedCoin?: string;
@@ -9,16 +11,24 @@ interface AmountInputProps {
 export default function AmountInput({ selectedCoin = "BTC", stepSize = 1 }: AmountInputProps) {
   const [amount, setAmount] = useState("");
 
+  const stepSizes = useRecoilValue(symbolStepSizeSelector);
+  const stepSize2 = stepSizes[selectedCoin]?.amount; // 기본값 1
+
+  // 코인이 변경될 때 수량 초기화
+  useEffect(() => {
+    setAmount("");
+  }, [selectedCoin]);
+
   const handleIncrement = () => {
     const currentAmount = parseFloat(amount) || 0;
-    const updatedAmount = (currentAmount + stepSize).toString();
+    const updatedAmount = (currentAmount + stepSize2).toString();
     setAmount(updatedAmount);
   };
 
   const handleDecrement = () => {
     const currentAmount = parseFloat(amount) || 0;
     if (currentAmount > 0) {
-      const updatedAmount = (currentAmount - stepSize).toString();
+      const updatedAmount = (currentAmount - stepSize2).toString();
       setAmount(updatedAmount);
     }
   };
