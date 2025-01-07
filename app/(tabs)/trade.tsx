@@ -10,10 +10,12 @@ import { use24hrTicker, useCoinList } from "@/hooks/queries/useCoinList";
 import { TradingPairsList } from "@/components/TradingPairsList";
 import { SubTabs } from "@/components/SubTabs";
 import { altsSubTabs, fiatSubTabs } from "@/constants/Tabs";
-import { useRecoilState } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import { coinState } from "@/atoms/coinAtom";
 import { OrderType, ORDER_TYPES } from "@/constants/Types";
 import PriceInput from "@/components/PriceInput/PriceInput";
+import AmountInput from "@/components/AmountInput/AmountInput";
+import { symbolStepSizeSelector } from "@/atoms/exchangeInfo";
 
 export default function TradeScreen() {
   const [orderType, setOrderType] = useState<OrderType>("Limit");
@@ -27,6 +29,7 @@ export default function TradeScreen() {
   const symbolSnapPoints = useMemo(() => ["80%"], []);
 
   const [coin, setCoin] = useRecoilState(coinState);
+  const stepSizes = useRecoilValue(symbolStepSizeSelector);
 
   const handleOrderTypePress = () => {
     orderTypeBottomSheetRef.current?.expand();
@@ -108,18 +111,7 @@ export default function TradeScreen() {
               {/* Price Input */}
               <PriceInput selectedPair={coin.selectedPair} />
               {/* Amount Input */}
-              <View className="bg-gray-100 rounded-lg mb-3">
-                <Text className="text-gray-400 text-sm px-2 pt-2">Amount ({coin.selectedCoin})</Text>
-                <View className="flex-row items-center px-2">
-                  <TouchableOpacity className="p-2">
-                    <Text className="text-gray-400">-</Text>
-                  </TouchableOpacity>
-                  <TextInput className="flex-1 text-center" placeholder="0" keyboardType="numeric" />
-                  <TouchableOpacity className="p-2">
-                    <Text className="text-gray-400">+</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
+              <AmountInput selectedCoin={coin.selectedCoin} stepSize={stepSizes[coin.selectedCoin] || 1} />
               {/* Total */}
               <View className="bg-gray-100 rounded-lg mb-3">
                 <Text className="text-gray-400 text-sm px-4 pt-2">Total ({coin.selectedPair})</Text>

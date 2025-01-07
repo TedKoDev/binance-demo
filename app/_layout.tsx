@@ -6,15 +6,37 @@ import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
 import "react-native-reanimated";
-import { RecoilRoot } from "recoil";
+import { RecoilRoot, useSetRecoilState } from "recoil";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { StyleSheet } from "react-native";
+import { exchangeInfoState } from "@/atoms/exchangeInfo";
+import { fetchCoinList } from "@/api/binance";
 
 // Import your global CSS file
 import "../global.css";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
+
+// RecoilRoot 밖에서 실행될 별도의 컴포넌트 생성
+function InitializeApp() {
+  const setExchangeInfo = useSetRecoilState(exchangeInfoState);
+
+  useEffect(() => {
+    const loadExchangeInfo = async () => {
+      try {
+        const data = await fetchCoinList();
+        setExchangeInfo(data);
+      } catch (error) {
+        console.error("Failed to fetch exchange info:", error);
+      }
+    };
+
+    loadExchangeInfo();
+  }, []);
+
+  return null;
+}
 
 export default function RootLayout() {
   const [loaded] = useFonts({
@@ -34,10 +56,10 @@ export default function RootLayout() {
   const queryClient = new QueryClient();
 
   return (
-    // <ThemeProvider value={DefaultTheme}>
     <GestureHandlerRootView style={styles.container}>
       <QueryClientProvider client={queryClient}>
         <RecoilRoot>
+          <InitializeApp />
           <StatusBar style="auto" />
           <Stack>
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
@@ -46,7 +68,6 @@ export default function RootLayout() {
         </RecoilRoot>
       </QueryClientProvider>
     </GestureHandlerRootView>
-    // </ThemeProvider>
   );
 }
 

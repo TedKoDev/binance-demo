@@ -5,6 +5,14 @@ export interface ExchangeInfo {
     symbol: string;
     baseAsset: string;
     quoteAsset: string;
+    filters: Array<{
+      filterType: string;
+      stepSize?: string; // LOT_SIZE filter
+      tickSize?: string; // PRICE_FILTER filter
+      minQty?: string;
+      maxQty?: string;
+      [key: string]: any;
+    }>;
   }>;
 }
 
