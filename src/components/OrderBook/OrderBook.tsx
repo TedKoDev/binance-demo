@@ -82,8 +82,8 @@ export const OrderBook = () => {
             ))}
 
         {/* Current Price */}
-        <TouchableOpacity className="flex-row justify-between px-4 py-2 border-y border-gray-100" onPress={() => handlePriceSelect(currentPrice.toString())}>
-          <Text className="text-emerald-500 text-sm font-bold">{Number(currentPrice).toFixed(6)}</Text>
+        <TouchableOpacity className="flex items-center px-4 py-2 border-y border-gray-100" onPress={() => handlePriceSelect(currentPrice.toString())}>
+          <Text className="text-emerald-500 text-2xl font-bold">{Number(currentPrice).toFixed(6)}</Text>
           <Text className="text-gray-400 text-sm">≈ ${Number(currentPrice).toFixed(6)}</Text>
         </TouchableOpacity>
 
@@ -95,12 +95,13 @@ export const OrderBook = () => {
               <Text className="text-gray-700 text-sm">{formatK(Number(bid[1]))}</Text>
             </TouchableOpacity>
           ))}
-
-        <TouchableOpacity onPress={toggleViewMode} className="w-6 h-6 justify-center items-center">
-          {viewMode === "all" && <Ionicons name="grid-outline" size={20} color="#666" />}
-          {viewMode === "asks" && <Ionicons name="arrow-down" size={20} color="#ef4444" />}
-          {viewMode === "bids" && <Ionicons name="arrow-up" size={20} color="#10b981" />}
-        </TouchableOpacity>
+        <View className="flex-row justify-center items-end mb-5 border-t border-gray-100">
+          <TouchableOpacity onPress={toggleViewMode} className="w-6  mt-4 h-6 justify-center items-end">
+            {viewMode === "all" && <Ionicons name="grid-outline" size={20} color="#666" />}
+            {viewMode === "asks" && <Ionicons name="arrow-down" size={20} color="#ef4444" />}
+            {viewMode === "bids" && <Ionicons name="arrow-up" size={20} color="#10b981" />}
+          </TouchableOpacity>
+        </View>
       </ScrollView>
     </View>
   );
