@@ -55,11 +55,11 @@ export const fetchCoinList = async (): Promise<ExchangeInfo> => {
   return response.data;
 };
 
-export const fetchOrderBook = async (symbol: string): Promise<OrderBookData> => {
+export const fetchOrderBook = async (symbol: string, limit: number = 13): Promise<OrderBookData> => {
   const response: AxiosResponse<OrderBookData> = await binanceApi.get("/depth", {
     params: {
       symbol,
-      limit: 13,
+      limit,
     },
   });
   return response.data;

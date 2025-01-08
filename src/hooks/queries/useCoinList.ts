@@ -9,10 +9,10 @@ export const useCoinList = () => {
   });
 };
 
-export const useOrderBook = (symbol: string) => {
+export const useOrderBook = (symbol: string, limit: number = 13) => {
   return useQuery({
-    queryKey: ["orderBook", symbol],
-    queryFn: () => fetchOrderBook(symbol),
+    queryKey: ["orderBook", symbol, limit],
+    queryFn: () => fetchOrderBook(symbol, limit),
   });
 };
 
