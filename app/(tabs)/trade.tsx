@@ -55,11 +55,11 @@ export default function TradeScreen() {
 
   const [isSearchActive, setIsSearchActive] = useState(false);
 
-  console.log("isSearchActive", isSearchActive);
+  //console.log("isSearchActive", isSearchActive);
 
   const [searchHistory, setSearchHistory] = useRecoilState(searchHistoryState);
 
-  console.log("searchHistory", searchHistory);
+  //console.log("searchHistory", searchHistory);
 
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const exchangeInfo = useRecoilValue(exchangeInfoState);
@@ -166,7 +166,7 @@ export default function TradeScreen() {
     [tickerData]
   );
 
-  console.log("searchHistory", searchHistory);
+  //console.log("searchHistory", searchHistory);
 
   const debouncedSearch = useMemo(
     () =>

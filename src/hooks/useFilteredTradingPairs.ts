@@ -6,7 +6,7 @@ import { useRecoilValue } from "recoil";
 export const useFilteredTradingPairs = (tickerData: TickerData[] | undefined, selectedTab: string, selectedSubTabs: string[]) => {
   const favorites = useRecoilValue(favoritesState);
 
-  console.log("favorites", favorites);
+  //console.log("favorites", favorites);
 
   return useMemo(() => {
     if (!tickerData || !Array.isArray(tickerData)) return [];
@@ -43,7 +43,7 @@ export const useFilteredTradingPairs = (tickerData: TickerData[] | undefined, se
         const pair = selectedTab === "ALTS" || selectedTab === "FIAT" ? selectedSubTabs.find((subTab) => ticker.symbol.endsWith(subTab)) || "ETH" : selectedTab;
 
         if (!pair || pair === "Favorites") {
-          console.log("pair11", pair);
+          //console.log("pair11", pair);
           const quoteAssets = ["USDT", "BUSD", "USDC", "TUSD", "BTC", "ETH", "BNB", "FDUSD"];
           quoteAsset = quoteAssets.find((quote) => ticker.symbol.endsWith(quote)) || "";
           baseAsset = ticker.symbol.replace(quoteAsset, "");
@@ -57,7 +57,7 @@ export const useFilteredTradingPairs = (tickerData: TickerData[] | undefined, se
             volume: ticker.volume,
           };
         } else {
-          console.log("pair", pair);
+          //console.log("pair", pair);
           return {
             symbol: ticker.symbol.replace(pair, ""),
             pair,

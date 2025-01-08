@@ -19,7 +19,7 @@ const App = () => {
 
   // callbacks
   const handleSheetChange = useCallback((index: number) => {
-    console.log("handleSheetChange", index);
+    //console.log("handleSheetChange", index);
   }, []);
   const handleClosePress = useCallback(() => {
     sheetRef.current?.close();

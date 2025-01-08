@@ -43,7 +43,7 @@ const PERIODS = [
 const INDICATORS = ["MA", "EMA", "BOLL", "SAR", "AVL", "VOL", "MACD"];
 
 function PriceHeader({ data }: { data: any[] }) {
-  console.log("data", data);
+  //console.log("data", data);
   if (!data || data.length === 0) return null;
   const lastPrice = parseFloat(data[data.length - 1].close);
   const prevPrice = parseFloat(data[data.length - 2].close);
@@ -131,8 +131,8 @@ export default function GraphScreen() {
     }));
   }, [klines]);
 
-  console.log("Chart Data Length:", chartData.length);
-  console.log("First candle:", chartData[0]);
+  //console.log("Chart Data Length:", chartData.length);
+  //console.log("First candle:", chartData[0]);
 
   return (
     <SafeAreaView className="flex-1 bg-[#FAFAFA]">

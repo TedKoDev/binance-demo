@@ -13,7 +13,7 @@ export default function AmountInput({ selectedCoin = "BTC", stepSize = 1 }: Amou
 
   const stepSizes = useRecoilValue(symbolStepSizeSelector);
   const stepSize2 = stepSizes[selectedCoin]?.amount || 1;
-  console.log("stepSize2", stepSize2);
+  //console.log("stepSize2", stepSize2);
 
   // 코인이 변경될 때 수량 초기화
   useEffect(() => {
