@@ -19,15 +19,22 @@ import Slider from "@react-native-community/slider";
 import { ImageSourcePropType } from "react-native";
 import { TotalInput } from "@/components/TotalInput/TotalInput";
 
-import { searchHistoryState } from "@/atoms/searchHistoryAtom";
+import { SearchHistory, searchHistoryState } from "@/atoms/searchHistoryAtom";
 import debounce from "lodash/debounce";
 import { TopTradeItem } from "@/components/listitems/toptradeitem";
 import TopTradeList from "@/components/PairsList.tsx/toptradeList";
+import { use24hrTicker } from "@/hooks/queries/useCoinList";
+import { TickerData } from "@/api/binance";
+import { favoritesState } from "@/atoms/favoritesAtom";
 
 interface SearchResult {
   symbol: string;
   baseAsset: string;
   quoteAsset: string;
+  price: string;
+  priceChange: string;
+  leverage?: string;
+  tag?: string;
 }
 
 export default function TradeScreen() {
@@ -44,7 +51,6 @@ export default function TradeScreen() {
   const [coin, setCoin] = useRecoilState(coinState);
   const stepSizes = useRecoilValue(symbolStepSizeSelector);
   const [icon, setIcon] = useState<ImageSourcePropType>();
-  const [thumbIcon, setThumbIcon] = useState<ImageSourcePropType>();
 
   const [isSearchActive, setIsSearchActive] = useState(false);
 
@@ -62,10 +68,27 @@ export default function TradeScreen() {
   const [searchInput, setSearchInput] = useState("");
   const searchInputRef = useRef<TextInput>(null);
 
+  const { data: tickerData } = use24hrTicker();
+
+  const [favorites, setFavorites] = useRecoilState(favoritesState);
+
+  const handleFavoritePress = (result: SearchResult) => {
+    setFavorites((prev) => {
+      const existingIndex = prev.findIndex((item) => item.symbol === result.symbol);
+
+      if (existingIndex >= 0) {
+        // Remove from favorites if already exists
+        return prev.filter((_, index) => index !== existingIndex);
+      } else {
+        // Add to favorites
+        return [...prev, result];
+      }
+    });
+  };
+
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const offsetY = event.nativeEvent.contentOffset.y;
 
-    // const scrollY = event.nativeEvent.contentOffset.y;
     if (offsetY > 10) {
       setShowTopTrade(true);
     } else {
@@ -111,22 +134,35 @@ export default function TradeScreen() {
   // 검색 로직
   const searchSymbols = useCallback(
     (searchText: string) => {
-      if (!exchangeInfo || !searchText) {
+      if (!searchText || !tickerData) {
         setSearchResults([]);
         return;
       }
+      const results = Array.isArray(tickerData)
+        ? tickerData
+            .filter((ticker: TickerData) => {
+              const symbol = ticker.symbol.toLowerCase();
+              const searchLower = searchText.toLowerCase();
+              return symbol.includes(searchLower);
+            })
+            .map((ticker: TickerData) => {
+              const baseAsset = ticker.symbol.replace(/(USDT|BUSD|USDC|BTC|ETH)$/, "");
+              const quoteAsset = ticker.symbol.slice(baseAsset.length);
 
-      const results = exchangeInfo.symbols
-        .filter((symbol) => symbol.symbol.toLowerCase().includes(searchText.toLowerCase()) || symbol.baseAsset.toLowerCase().includes(searchText.toLowerCase()))
-        .map((symbol) => ({
-          symbol: symbol.symbol,
-          baseAsset: symbol.baseAsset,
-          quoteAsset: symbol.quoteAsset,
-        }));
+              return {
+                symbol: ticker.symbol,
+                baseAsset: baseAsset,
+                quoteAsset: quoteAsset,
+                price: parseFloat(ticker.lastPrice).toFixed(2),
+                priceChange: parseFloat(ticker.priceChangePercent).toFixed(2),
+                leverage: "5x",
+              };
+            })
+        : [];
 
       setSearchResults(results);
     },
-    [exchangeInfo]
+    [tickerData]
   );
 
   console.log("searchHistory", searchHistory);
@@ -160,6 +196,73 @@ export default function TradeScreen() {
       setSearchInput("");
       searchInputRef.current?.blur(); // 포커스 해제
     }
+  };
+
+  const renderSearchResults = () => {
+    if (!searchInput || searchResults.length === 0) return null;
+
+    return (
+      <View className="flex-1">
+        {searchResults.map((result, index) => (
+          <TouchableOpacity
+            key={index}
+            className="px-4 py-3 flex-row items-center justify-between border-b border-gray-100"
+            onPress={() => {
+              // Add to search history
+              const newHistoryItem = {
+                baseAsset: result.baseAsset,
+                quoteAsset: result.quoteAsset,
+                leverage: result.leverage,
+              };
+
+              setSearchHistory((prev: any) => {
+                const filtered = prev.filter((item: any) => !(item.baseAsset === newHistoryItem.baseAsset && item.quoteAsset === newHistoryItem.quoteAsset));
+                return [newHistoryItem, ...filtered].slice(0, 10);
+              });
+
+              setCoin((prev) => ({
+                ...prev,
+                selectedCoin: result.baseAsset,
+                selectedPair: result.quoteAsset,
+              }));
+
+              symbolBottomSheetRef.current?.close();
+            }}
+          >
+            {/* Left side */}
+            <View className="flex-row items-center">
+              <TouchableOpacity
+                className="mr-3"
+                onPress={(e) => {
+                  e.stopPropagation();
+                  handleFavoritePress(result);
+                }}
+              >
+                <AntDesign name={favorites.some((f) => f.symbol === result.symbol) ? "star" : "staro"} size={16} color={favorites.some((f) => f.symbol === result.symbol) ? "#F0B90B" : "#999"} />
+              </TouchableOpacity>
+              <View>
+                <View className="flex-row items-center">
+                  <Text className="text-base font-medium">
+                    {result.baseAsset}/{result.quoteAsset}
+                  </Text>
+                  {result.leverage && (
+                    <View className="ml-2 px-1 py-0.5">
+                      <Text className="text-xs text-gray-500">{result.leverage}</Text>
+                    </View>
+                  )}
+                </View>
+              </View>
+            </View>
+
+            {/* Right side */}
+            <View className="items-end">
+              <Text className="text-base font-medium">{result.price}</Text>
+              <Text className={`text-sm ${parseFloat(result.priceChange) < 0 ? "text-red-500" : "text-green-500"}`}>{result.priceChange}%</Text>
+            </View>
+          </TouchableOpacity>
+        ))}
+      </View>
+    );
   };
 
   return (
@@ -394,48 +497,56 @@ export default function TradeScreen() {
             )}
             {isSearchActive ? (
               <View style={{ flex: 1 }}>
-                <ScrollView onScroll={handleScroll} scrollEventThrottle={16} stickyHeaderIndices={searchHistory.length > 0 ? [1] : [0]}>
-                  {/* Search History Section - 조건부 렌더링 */}
-                  {searchHistory.length > 0 && (
-                    <View className="px-4 py-3">
-                      <View className="flex-row justify-between items-center mb-2">
-                        <Text className="text-gray-400 text-lg">Search History</Text>
-                        <TouchableOpacity onPress={clearHistory}>
-                          <MaterialIcons name="delete" size={24} color="#999" />
-                        </TouchableOpacity>
-                      </View>
-                      <View className="flex-row flex-wrap gap-2">
-                        {searchHistory.map((item, index) => (
-                          <View key={index} className="mb-2">
-                            <View className="flex-row bg-gray-800/10 py-2 px-4 rounded-lg">
-                              <Text className="text-black font-medium">
-                                {item.baseAsset}/{item.quoteAsset}
-                              </Text>
-                              <View className="bg-white rounded-md px-1.5 ml-2">
-                                <Text className="text-gray-600 text-sm">{item.leverage}</Text>
-                              </View>
-                            </View>
+                <ScrollView onScroll={handleScroll} scrollEventThrottle={16}>
+                  {/* Search Results Section */}
+                  {renderSearchResults()}
+
+                  {/* Show history and top trade only when no search results */}
+                  {(!searchInput || searchResults.length === 0) && (
+                    <>
+                      {/* Search History Section */}
+                      {searchHistory.length > 0 && (
+                        <View className="px-4 py-3">
+                          <View className="flex-row justify-between items-center mb-2">
+                            <Text className="text-gray-400 text-lg">Search History</Text>
+                            <TouchableOpacity onPress={clearHistory}>
+                              <MaterialIcons name="delete" size={24} color="#999" />
+                            </TouchableOpacity>
                           </View>
-                        ))}
+                          <View className="flex-row flex-wrap gap-2">
+                            {searchHistory.map((item, index) => (
+                              <View key={index} className="mb-2">
+                                <View className="flex-row bg-gray-800/10 py-2 px-4 rounded-lg">
+                                  <Text className="text-black font-medium">
+                                    {item.baseAsset}/{item.quoteAsset}
+                                  </Text>
+                                  <View className="bg-white rounded-md px-1.5 ml-2">
+                                    <Text className="text-gray-600 text-sm">{item.leverage}</Text>
+                                  </View>
+                                </View>
+                              </View>
+                            ))}
+                          </View>
+                        </View>
+                      )}
+
+                      {/* Top Trade Section */}
+                      <View style={{ backgroundColor: "white" }}>
+                        <View className="px-4 py-3 border-t border-b border-gray-100">
+                          <Text className="text-lg font-bold">Top Trade</Text>
+                        </View>
                       </View>
-                    </View>
+
+                      {/* Top Trade List*/}
+                      <View className="px-4">
+                        <TopTradeList
+                          onPress={() => {
+                            symbolBottomSheetRef.current?.close();
+                          }}
+                        />
+                      </View>
+                    </>
                   )}
-
-                  {/* Top Trade Section - 스티키 헤더가 됩니다 */}
-                  <View style={{ backgroundColor: "white" }}>
-                    <View className="px-4 py-3 border-t border-b border-gray-100">
-                      <Text className="text-lg font-bold">Top Trade</Text>
-                    </View>
-                  </View>
-
-                  {/* Top Trade List*/}
-                  <View className="px-4">
-                    <TopTradeList
-                      onPress={() => {
-                        symbolBottomSheetRef.current?.close();
-                      }}
-                    />
-                  </View>
                 </ScrollView>
               </View>
             ) : (
