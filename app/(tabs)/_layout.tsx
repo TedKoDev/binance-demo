@@ -28,27 +28,6 @@ export default function TabLayout() {
             tabBarIcon: ({ color }) => <MaterialIcons size={28} name="home" color={color} />,
           }}
         />
-        <Tabs.Screen
-          name="markets"
-          options={{
-            title: "Markets",
-            tabBarIcon: ({ color }) => <MaterialIcons size={28} name="bar-chart" color={color} />,
-          }}
-        />
-        <Tabs.Screen
-          name="futures"
-          options={{
-            title: "Futures",
-            tabBarIcon: ({ color }) => <MaterialIcons size={28} name="timeline" color={color} />,
-          }}
-        />
-        <Tabs.Screen
-          name="wallets"
-          options={{
-            title: "Wallets",
-            tabBarIcon: ({ color }) => <MaterialIcons size={28} name="account-balance-wallet" color={color} />,
-          }}
-        />
       </Tabs>
     </BottomSheetModalProvider>
   );

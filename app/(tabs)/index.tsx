@@ -1,62 +1,31 @@
-import React, { useCallback, useRef, useMemo } from "react";
-import { StyleSheet, View, Text, Button } from "react-native";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
-import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
+import { StyleSheet, Image, Platform, View, Text } from "react-native";
 
-const App = () => {
-  // hooks
-  const sheetRef = useRef<BottomSheet>(null);
-
-  // variables
-  const data = useMemo(
-    () =>
-      Array(50)
-        .fill(0)
-        .map((_, index) => `index-${index}`),
-    []
-  );
-  const snapPoints = useMemo(() => ["80%"], []);
-
-  // callbacks
-  const handleSheetChange = useCallback((index: number) => {
-    //console.log("handleSheetChange", index);
-  }, []);
-  const handleClosePress = useCallback(() => {
-    sheetRef.current?.close();
-  }, []);
-
-  // render
-  const renderItem = useCallback(
-    (item: string) => (
-      <View key={item} style={styles.itemContainer}>
-        <Text>{item}</Text>
-      </View>
-    ),
-    []
-  );
+export default function HomeScreen() {
   return (
-    <GestureHandlerRootView style={styles.container}>
-      <Button title="Close" onPress={() => handleClosePress()} />
-      <BottomSheet ref={sheetRef} index={0} snapPoints={snapPoints} enableDynamicSizing={false} enableOverDrag={false} onChange={handleSheetChange}>
-        <BottomSheetScrollView contentContainerStyle={styles.contentContainer}>{data.map(renderItem)}</BottomSheetScrollView>
-      </BottomSheet>
-    </GestureHandlerRootView>
+    <View style={styles.container}>
+      <Text style={styles.text}>지원자 홍태의 과제제출</Text>
+    </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
+  headerImage: {
+    color: "#808080",
+    bottom: -90,
+    left: -35,
+    position: "absolute",
+  },
+  titleContainer: {
+    flexDirection: "row",
+    gap: 8,
+  },
   container: {
     flex: 1,
-    paddingTop: 200,
+    padding: 16,
+    justifyContent: "center",
+    alignItems: "center",
   },
-  contentContainer: {
-    backgroundColor: "white",
-  },
-  itemContainer: {
-    padding: 6,
-    margin: 6,
-    backgroundColor: "#eee",
+  text: {
+    fontSize: 16,
   },
 });
-
-export default App;
