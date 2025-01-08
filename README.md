@@ -1,3 +1,7 @@
+Start :
+
+npm run start
+
 # 2025-01-07 Binace-Demo Task 14:40 start
 
 # 필수 구현 요소 별 Binance APi check
