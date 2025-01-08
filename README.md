@@ -18,7 +18,28 @@ API : https://api.binance.com/api/v3/ticker/24hr
 
 API : https://api.binance.com/api/v3/depth?symbol=BTCUSDT&limit=10
 
-(3) 차트 시각화
+(3) 그래프용
+Kline/Candlestick Data API
+Endpoint: https://api.binance.com/api/v3/klines
+이 API를 사용하면 특정 심볼의 캔들스틱 데이터를 원하는 기간 단위(예: 1분, 1시간, 1일 등)로 가져올 수 있습니다.
+
+요청 형식
+http
+코드 복사
+GET /api/v3/klines?symbol=BTCUSDT&interval=1d&limit=3
+주요 파라미터:
+symbol: 조회할 심볼 (예: BTCUSDT, ETHUSDT 등)
+interval: 조회 주기 (캔들스틱 데이터의 기간)
+예시 값:
+1m (1분), 5m (5분), 1h (1시간), 1d (1일), 1w (1주)
+limit: 가져올 데이터 수 (예: 3이면 가장 최근 3개의 데이터)
+startTime, endTime (선택): 특정 시간 범위를 지정해 데이터를 가져올 수도 있음.
+
+예시
+1일기준 3일 데이터 요청
+API : https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1d&limit=3
+
+(4) 차트 시각화
 코인 가격 데이터를 시각적으로 보여주는 차트.
 React Native에서 사용할 수 있는 차트 라이브러리 사용.
 

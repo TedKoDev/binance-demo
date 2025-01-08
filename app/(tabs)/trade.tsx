@@ -4,7 +4,7 @@ import { TradeTypeMenu } from "@/components/TradeTypeMenu/TradeTypeMenu";
 import { OrderBook } from "@/components/OrderBook/OrderBook";
 import { MaterialIcons, Ionicons } from "@expo/vector-icons";
 import AntDesign from "@expo/vector-icons/AntDesign";
-import BottomSheet, { BottomSheetView, BottomSheetBackdrop, BottomSheetScrollView } from "@gorhom/bottom-sheet";
+import BottomSheet, { BottomSheetView, BottomSheetBackdrop } from "@gorhom/bottom-sheet";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { TradingPairsList } from "@/components/PairsList.tsx/TradingPairsList";
 import { SubTabs } from "@/components/SubTabs";
@@ -26,6 +26,7 @@ import TopTradeList from "@/components/PairsList.tsx/toptradeList";
 import { use24hrTicker } from "@/hooks/queries/useCoinList";
 import { TickerData } from "@/api/binance";
 import { favoritesState } from "@/atoms/favoritesAtom";
+import { Link, router } from "expo-router";
 
 interface SearchResult {
   symbol: string;
@@ -288,7 +289,16 @@ export default function TradeScreen() {
                 </Text>
               </View>
               <View className="flex-row gap-4">
-                <MaterialIcons name="candlestick-chart" size={24} color="#666" />
+                <TouchableOpacity
+                  onPress={() =>
+                    router.push({
+                      pathname: "/graph",
+                      params: { symbol: `${coin.selectedCoin}${coin.selectedPair}` },
+                    })
+                  }
+                >
+                  <MaterialIcons name="candlestick-chart" size={24} color="#666" />
+                </TouchableOpacity>
                 <MaterialIcons name="more-vert" size={24} color="#666" />
               </View>
             </View>
