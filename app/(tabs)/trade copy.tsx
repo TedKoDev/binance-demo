@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo, useRef, useEffect } from "react";
-import { View, SafeAreaView, Text, TouchableOpacity, TextInput, ScrollView, RefreshControl, Pressable, Animated, NativeSyntheticEvent, NativeScrollEvent } from "react-native";
+import { View, SafeAreaView, Text, TouchableOpacity, TextInput, ScrollView, RefreshControl, Pressable, Animated } from "react-native";
 import { TradeTypeMenu } from "@/components/TradeTypeMenu/TradeTypeMenu";
 import { OrderBook } from "@/components/OrderBook/OrderBook";
 import { MaterialIcons, Ionicons } from "@expo/vector-icons";
@@ -45,28 +45,12 @@ export default function TradeScreen() {
   const [thumbIcon, setThumbIcon] = useState<ImageSourcePropType>();
 
   const [isSearchActive, setIsSearchActive] = useState(false);
-
-  console.log("isSearchActive", isSearchActive);
-
   const [searchHistory, setSearchHistory] = useRecoilState(searchHistoryState);
 
   console.log("searchHistory", searchHistory);
 
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const exchangeInfo = useRecoilValue(exchangeInfoState);
-
-  const [showTopTrade, setShowTopTrade] = useState(false);
-
-  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const offsetY = event.nativeEvent.contentOffset.y;
-
-    // const scrollY = event.nativeEvent.contentOffset.y;
-    if (offsetY > 10) {
-      setShowTopTrade(true);
-    } else {
-      setShowTopTrade(false);
-    }
-  };
 
   useEffect(() => {
     // MaterialIcons from @expo/vector-icons doesn't have getImageSource method
@@ -302,7 +286,6 @@ export default function TradeScreen() {
         </BottomSheet>
 
         {/* Symbol Selection Bottom Sheet */}
-        {/* Symbol Selection Bottom Sheet */}
         <BottomSheet
           ref={symbolBottomSheetRef}
           index={-1}
@@ -329,76 +312,34 @@ export default function TradeScreen() {
                 zIndex: 1,
               }}
             >
-              <View className="px-4 py-3 flex-row items-center border-b border-gray-100">
-                <View className="flex-row flex-1 bg-gray-100 h-12 rounded-lg px-4 py-3">
-                  <MaterialIcons name="search" size={24} color="#999" />
-                  <TextInput
-                    className="flex-1 ml-2 text-base text-black"
-                    placeholder="Search"
-                    placeholderTextColor="#999"
-                    onChangeText={handleSearchInput}
-                    onPress={() => setIsSearchActive(true)}
-                    onFocus={() => setIsSearchActive(true)}
-                  />
-                </View>
-
-                {isSearchActive ? (
-                  <View className="flex-row items-center ml-4">
-                    <TouchableOpacity onPress={cancelSearch}>
-                      <Text className="text-yellow-500">Cancel</Text>
-                    </TouchableOpacity>
+              <View className="absolute top-0 left-0 right-0 bottom-0 bg-white z-50">
+                <View className="px-4 py-3 flex-row items-center border-b border-gray-100">
+                  <View className="flex-row flex-1 bg-gray-100 h-12 rounded-lg px-4 py-3">
+                    <MaterialIcons name="search" size={24} color="#999" />
+                    <TextInput className="flex-1 ml-2 text-base text-black" placeholder="Search" placeholderTextColor="#999" onChangeText={handleSearchInput} onFocus={() => setIsSearchActive(true)} />
                   </View>
-                ) : null}
-              </View>
-            </View>
-            {isSearchActive ? null : (
-              <>
-                {/* Main Category Tabs */}
-                <View className="border-b border-gray-100 mt-2">
-                  <ScrollView horizontal showsHorizontalScrollIndicator={false} className="px-4">
-                    <View className="flex-row">
-                      {["Favorites", "USDT", "FDUSD", "USDC", "TUSD", "BNB", "BTC", "ALTS", "FIAT", "Zones"].map((tab) => (
-                        <TouchableOpacity key={tab} onPress={() => handleTabSelect(tab)}>
-                          <Text className={`mr-6 pb-2 ${coin.selectedTab === tab ? "text-yellow-500 border-b-2 border-yellow-500" : "text-gray-400"}`}>{tab}</Text>
-                        </TouchableOpacity>
-                      ))}
+
+                  {isSearchActive ? (
+                    <View className="flex-row items-center ml-4">
+                      <TouchableOpacity onPress={cancelSearch}>
+                        <Text className="text-yellow-500">Cancel</Text>
+                      </TouchableOpacity>
                     </View>
-                  </ScrollView>
+                  ) : null}
                 </View>
-
-                {/* Sub tabs for ALTS and FIAT */}
-                {(coin.selectedTab === "ALTS" || coin.selectedTab === "FIAT") && (
-                  <View>
-                    <SubTabs tabs={coin.selectedTab === "ALTS" ? altsSubTabs : fiatSubTabs} selectedSubTabs={coin.selectedSubTabs} onSelectSubTab={handleSubTabSelect} />
-                  </View>
-                )}
-
-                {/* Column Headers */}
-                <View style={{ height: 40 }} className="flex-row justify-between px-4 py-2">
-                  <Text className="text-gray-400">Name / Vol</Text>
-                  <Text className="text-gray-400">Last Price / 24h Change</Text>
-                </View>
-              </>
-            )}
-            {isSearchActive ? (
-              <View style={{ flex: 1 }}>
-                <ScrollView
-                  onScroll={handleScroll}
-                  scrollEventThrottle={16}
-                  stickyHeaderIndices={searchHistory.length > 0 ? [1] : [0]} // Top Trade 섹션을 sticky로 만듭니다
-                >
-                  {/* Search History Section */}
-                  {/* Search History Section - 조건부 렌더링 */}
-                  {searchHistory.length > 0 && (
-                    <View className="px-4 py-3">
-                      <View className="flex-row justify-between items-center mb-2">
+                <View className="px-4 py-3">
+                  {/* 검색 결과 �는 히스토리 표시 */}
+                  {searchHistory.length > 0 ? (
+                    // <View className="flex-1">
+                    <>
+                      <View className="flex-row justify-between items-center">
                         <Text className="text-gray-400 text-lg">Search History</Text>
                         <TouchableOpacity onPress={clearHistory}>
                           <MaterialIcons name="delete" size={24} color="#999" />
                         </TouchableOpacity>
                       </View>
                       {searchHistory.map((item, index) => (
-                        <View key={index} className="flex-row justify-between items-center py-2">
+                        <View key={index} className="flex-row justify-between items-center py-3">
                           <View className="flex-row items-center">
                             <Text className="text-gray-400">{item.symbol}</Text>
                             <Text className="text-gray-500 ml-2">{item.leverage}</Text>
@@ -408,21 +349,41 @@ export default function TradeScreen() {
                           </TouchableOpacity>
                         </View>
                       ))}
-                    </View>
-                  )}
+                    </>
+                  ) : null}
+                </View>
+              </View>
 
-                  {/* Top Trade Section - 스티키 헤더가 됩니다 */}
-                  <View style={{ backgroundColor: "white" }}>
-                    <View className="px-4 py-3 border-t border-b border-gray-100">
-                      <Text className="text-lg font-bold">Top Trade</Text>
-                    </View>
-                  </View>
-
-                  {/* Trading Pairs List */}
-                  <View className="px-4">
-                    <TradingPairsList selectedTab={coin.selectedTab} selectedSubTabs={coin.selectedSubTabs} onPairSelect={() => symbolBottomSheetRef.current?.close()} />
+              {/* Main Category Tabs */}
+              <View className="border-b border-gray-100">
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} className="px-4">
+                  <View className="flex-row">
+                    {["Favorites", "USDT", "FDUSD", "USDC", "TUSD", "BNB", "BTC", "ALTS", "FIAT", "Zones"].map((tab) => (
+                      <TouchableOpacity key={tab} onPress={() => handleTabSelect(tab)}>
+                        <Text className={`mr-6 pb-2 ${coin.selectedTab === tab ? "text-yellow-500 border-b-2 border-yellow-500" : "text-gray-400"}`}>{tab}</Text>
+                      </TouchableOpacity>
+                    ))}
                   </View>
                 </ScrollView>
+              </View>
+
+              {/* Sub tabs for ALTS and FIAT */}
+              {(coin.selectedTab === "ALTS" || coin.selectedTab === "FIAT") && (
+                <View>
+                  <SubTabs tabs={coin.selectedTab === "ALTS" ? altsSubTabs : fiatSubTabs} selectedSubTabs={coin.selectedSubTabs} onSelectSubTab={handleSubTabSelect} />
+                </View>
+              )}
+
+              {/* Column Headers */}
+              <View style={{ height: 40 }} className="flex-row justify-between px-4 py-2">
+                <Text className="text-gray-400">Name / Vol</Text>
+                <Text className="text-gray-400">Last Price / 24h Change</Text>
+              </View>
+            </View>
+
+            {isSearchActive ? (
+              <View className="px-4 py-3">
+                <Text>검색 히스토리</Text>
               </View>
             ) : (
               <View className="flex-1">

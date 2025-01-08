@@ -37,6 +37,10 @@ npm install nativewind tailwindcss react-native-reanimated react-native-safe-are
 
 expo install @gorhom/bottom-sheet react-native-reanimated react-native-gesture-handler
 
+#lodash의 debounce를 설치
+npm install lodash
+npm install --save-dev @types/lodash
+
 ## 특이사항
 
 1. zones에 따른 코인정보는 API가 없음

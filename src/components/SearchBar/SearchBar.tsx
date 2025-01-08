@@ -12,7 +12,7 @@ interface SearchResult {
   quoteAsset: string;
 }
 
-export const SearchBar = () => {
+export const SearchBar = ({ onPress, onCancel }: { onPress: () => void; onCancel: () => void }) => {
   const [isActive, setIsActive] = useState(false);
   const [searchHistory, setSearchHistory] = useRecoilState(searchHistoryState);
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
@@ -54,9 +54,20 @@ export const SearchBar = () => {
     setSearchHistory((prev) => prev.filter((item) => item.symbol !== symbol));
   };
 
+  const handleCancel = () => {
+    setIsActive(false);
+    onCancel();
+  };
+
   if (!isActive) {
     return (
-      <Pressable onPress={() => setIsActive(true)} className="px-4 py-3">
+      <Pressable
+        onPress={() => {
+          setIsActive(true);
+          onPress();
+        }}
+        className="px-4 py-3"
+      >
         <View className="flex-row items-center bg-gray-100 rounded-lg px-4 py-3">
           <MaterialIcons name="search" size={24} color="#999" />
           <Text className="flex-1 ml-2 text-base text-gray-400">Search</Text>
@@ -68,12 +79,12 @@ export const SearchBar = () => {
   return (
     <View className="absolute top-0 left-0 right-0 bottom-0 bg-white z-50">
       <View className="px-4 py-3 flex-row items-center border-b border-gray-100">
-        <View className="flex-row flex-1 bg-gray-100 rounded-lg px-4 py-3">
+        <View className="flex-row flex-1 bg-gray-100 h-12 rounded-lg px-4 py-3">
           <MaterialIcons name="search" size={24} color="#999" />
           <TextInput className="flex-1 ml-2 text-base text-black" placeholder="Search" placeholderTextColor="#999" autoFocus onChangeText={handleSearchInput} />
         </View>
         <View className="flex-row items-center ml-4">
-          <TouchableOpacity onPress={() => setIsActive(false)}>
+          <TouchableOpacity onPress={handleCancel}>
             <Text className="text-yellow-500">Cancel</Text>
           </TouchableOpacity>
         </View>
