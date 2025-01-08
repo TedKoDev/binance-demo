@@ -3,6 +3,8 @@ import React from "react";
 import { Platform } from "react-native";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
+// Import your global CSS file
+import "../../global.css";
 
 export default function TabLayout() {
   return (

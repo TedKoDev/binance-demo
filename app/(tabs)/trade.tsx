@@ -511,15 +511,23 @@ export default function TradeScreen() {
             )}
             {isSearchActive ? (
               <View style={{ flex: 1 }}>
-                <ScrollView onScroll={handleScroll} scrollEventThrottle={16}>
-                  {/* Search Results Section */}
-                  {renderSearchResults()}
+                <ScrollView
+                  onScroll={handleScroll}
+                  scrollEventThrottle={16}
+                  stickyHeaderIndices={
+                    searchInput && searchResults.length > 0
+                      ? [] // 검색 결과가 있을 때는 sticky 비활성화
+                      : searchHistory.length > 0
+                      ? [1] // 히스토가 있을 때 Top Trade는 세 번째 요소
+                      : [0] // 히스토가 없을 때 Top Trade는 두 번째 요소
+                  }
+                >
+                  {/* First Section: Search Results or Empty View */}
+                  <View>{searchInput && searchResults.length > 0 && renderSearchResults()}</View>
 
-                  {/* Show history and top trade only when no search results */}
-                  {(!searchInput || searchResults.length === 0) && (
-                    <>
-                      {/* Search History Section */}
-                      {searchHistory.length > 0 && (
+                  {/* Second Section: Search History (if exists) */}
+                  {!searchInput || searchResults.length === 0
+                    ? searchHistory.length > 0 && (
                         <View className="px-4 py-3">
                           <View className="flex-row justify-between items-center mb-2">
                             <Text className="text-gray-400 text-lg">Search History</Text>
@@ -542,24 +550,27 @@ export default function TradeScreen() {
                             ))}
                           </View>
                         </View>
-                      )}
+                      )
+                    : null}
 
-                      {/* Top Trade Section */}
-                      <View style={{ backgroundColor: "white" }}>
-                        <View className="px-4 py-3 border-t border-b border-gray-100">
-                          <Text className="text-lg font-bold">Top Trade</Text>
-                        </View>
+                  {/* Third Section: Top Trade Header (Sticky) */}
+                  {(!searchInput || searchResults.length === 0) && (
+                    <View style={{ backgroundColor: "white", elevation: 2 }}>
+                      <View className="px-4 py-3 border-t border-b border-gray-100">
+                        <Text className="text-lg font-bold">Top Trade</Text>
                       </View>
+                    </View>
+                  )}
 
-                      {/* Top Trade List*/}
-                      <View className="px-4">
-                        <TopTradeList
-                          onPress={() => {
-                            symbolBottomSheetRef.current?.close();
-                          }}
-                        />
-                      </View>
-                    </>
+                  {/* Fourth Section: Top Trade List */}
+                  {(!searchInput || searchResults.length === 0) && (
+                    <View className="px-4">
+                      <TopTradeList
+                        onPress={() => {
+                          symbolBottomSheetRef.current?.close();
+                        }}
+                      />
+                    </View>
                   )}
                 </ScrollView>
               </View>

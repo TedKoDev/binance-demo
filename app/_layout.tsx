@@ -1,4 +1,8 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from "@react-navigation/native";
+
+// Import your global CSS file
+import "../global.css";
+
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
@@ -12,8 +16,6 @@ import { StyleSheet } from "react-native";
 import { exchangeInfoState } from "@/atoms/exchangeInfo";
 import { fetchCoinList } from "@/api/binance";
 
-// Import your global CSS file
-import "../global.css";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -60,7 +62,7 @@ export default function RootLayout() {
       <QueryClientProvider client={queryClient}>
         <RecoilRoot>
           <InitializeApp />
-          <StatusBar style="auto" />
+
           <Stack>
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
 
