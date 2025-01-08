@@ -18,6 +18,7 @@ import { symbolStepSizeSelector } from "@/atoms/exchangeInfo";
 import Slider from "@react-native-community/slider";
 import { ImageSourcePropType } from "react-native";
 import { TotalInput } from "@/components/TotalInput/TotalInput";
+import { SearchBar } from "@/components/SearchBar/SearchBar";
 
 export default function TradeScreen() {
   const [orderType, setOrderType] = useState<OrderType>("Limit");
@@ -267,12 +268,7 @@ export default function TradeScreen() {
               }}
             >
               {/* Search Input */}
-              <View style={{ height: 70 }} className="px-4 py-3">
-                <View className="flex-row items-center bg-gray-100 rounded-lg px-4 py-3">
-                  <MaterialIcons name="search" size={24} color="#999" />
-                  <TextInput className="flex-1 ml-2 text-base" placeholder="Search" placeholderTextColor="#999" />
-                </View>
-              </View>
+              <SearchBar />
 
               {/* Main Category Tabs */}
               <View className="border-b border-gray-100">
