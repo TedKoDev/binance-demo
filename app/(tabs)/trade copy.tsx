@@ -6,7 +6,7 @@ import { MaterialIcons, Ionicons } from "@expo/vector-icons";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import BottomSheet, { BottomSheetView, BottomSheetBackdrop, BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { TradingPairsList } from "@/components/TradingPairsList";
+import { TradingPairsList } from "@/components/PairsList.tsx/TradingPairsList";
 import { SubTabs } from "@/components/SubTabs";
 import { altsSubTabs, fiatSubTabs } from "@/constants/Tabs";
 import { useRecoilState, useRecoilValue } from "recoil";

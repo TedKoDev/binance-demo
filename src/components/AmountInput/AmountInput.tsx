@@ -12,7 +12,8 @@ export default function AmountInput({ selectedCoin = "BTC", stepSize = 1 }: Amou
   const [amount, setAmount] = useState("");
 
   const stepSizes = useRecoilValue(symbolStepSizeSelector);
-  const stepSize2 = stepSizes[selectedCoin]?.amount; // 기본값 1
+  const stepSize2 = stepSizes[selectedCoin]?.amount || 1;
+  console.log("stepSize2", stepSize2);
 
   // 코인이 변경될 때 수량 초기화
   useEffect(() => {
@@ -21,15 +22,26 @@ export default function AmountInput({ selectedCoin = "BTC", stepSize = 1 }: Amou
 
   const handleIncrement = () => {
     const currentAmount = parseFloat(amount) || 0;
-    const updatedAmount = (currentAmount + stepSize2).toString();
+    // 소수점 자릿수 계산
+    const decimals = Math.max(0, -Math.log10(stepSize2));
+    const updatedAmount = (currentAmount + stepSize2).toFixed(decimals);
     setAmount(updatedAmount);
   };
 
   const handleDecrement = () => {
     const currentAmount = parseFloat(amount) || 0;
     if (currentAmount > 0) {
-      const updatedAmount = (currentAmount - stepSize2).toString();
+      // 소수점 자릿수 계산
+      const decimals = Math.max(0, -Math.log10(stepSize2));
+      const updatedAmount = (currentAmount - stepSize2).toFixed(decimals);
       setAmount(updatedAmount);
+    }
+  };
+
+  const handleChangeText = (value: string) => {
+    // 숫자와 소수점만 허용
+    if (/^\d*\.?\d*$/.test(value) || value === "") {
+      setAmount(value);
     }
   };
 
@@ -47,7 +59,7 @@ export default function AmountInput({ selectedCoin = "BTC", stepSize = 1 }: Amou
         ) : (
           <>
             <Text className="text-center text-gray-400 text-xs -mb-2">Amount ({selectedCoin})</Text>
-            <TextInput className="flex-1 text-center text-black text-lg" value={amount} keyboardType="numeric" onChangeText={(value) => setAmount(value)} />
+            <TextInput className="flex-1 text-center text-black text-lg" value={amount} keyboardType="numeric" onChangeText={handleChangeText} />
           </>
         )}
       </View>

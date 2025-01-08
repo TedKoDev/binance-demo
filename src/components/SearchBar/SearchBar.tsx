@@ -99,7 +99,12 @@ export const SearchBar = ({ onPress, onCancel }: { onPress: () => void; onCancel
               className="px-4 py-3 border-b border-gray-100"
               onPress={() => {
                 // 검색 기록에 추가
-                setSearchHistory((prev) => [{ symbol: result.symbol, leverage: "5x" }, ...prev.filter((item) => item.symbol !== result.symbol)].slice(0, 10)); // 최대 10개만 유지
+                setSearchHistory((prev) =>
+                  [
+                    { symbol: result.symbol, leverage: "5x", price: 0, change: 0, rank: 0, baseAsset: result.baseAsset, quoteAsset: result.quoteAsset },
+                    ...prev.filter((item) => item.symbol !== result.symbol),
+                  ].slice(0, 10)
+                ); // 최대 10개만 유지
                 setIsActive(false);
               }}
             >

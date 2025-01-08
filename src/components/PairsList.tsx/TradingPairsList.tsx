@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity } from "react-native";
 import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { useRecoilState } from "recoil";
 
-import { useFilteredTradingPairs } from "../hooks/useFilteredTradingPairs";
+import { useFilteredTradingPairs } from "../../hooks/useFilteredTradingPairs";
 import { use24hrTicker } from "@/hooks/queries/useCoinList";
 import { TickerData } from "@/api/binance";
 import { coinState } from "@/atoms/coinAtom";

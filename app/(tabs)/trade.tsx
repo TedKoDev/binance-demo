@@ -6,7 +6,7 @@ import { MaterialIcons, Ionicons } from "@expo/vector-icons";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import BottomSheet, { BottomSheetView, BottomSheetBackdrop, BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { TradingPairsList } from "@/components/TradingPairsList";
+import { TradingPairsList } from "@/components/PairsList.tsx/TradingPairsList";
 import { SubTabs } from "@/components/SubTabs";
 import { altsSubTabs, fiatSubTabs } from "@/constants/Tabs";
 import { useRecoilState, useRecoilValue } from "recoil";
@@ -18,9 +18,11 @@ import { exchangeInfoState, symbolStepSizeSelector } from "@/atoms/exchangeInfo"
 import Slider from "@react-native-community/slider";
 import { ImageSourcePropType } from "react-native";
 import { TotalInput } from "@/components/TotalInput/TotalInput";
-import { SearchBar } from "@/components/SearchBar/SearchBar";
+
 import { searchHistoryState } from "@/atoms/searchHistoryAtom";
 import debounce from "lodash/debounce";
+import { TopTradeItem } from "@/components/listitems/toptradeitem";
+import TopTradeList from "@/components/PairsList.tsx/toptradeList";
 
 interface SearchResult {
   symbol: string;
@@ -56,6 +58,9 @@ export default function TradeScreen() {
   const exchangeInfo = useRecoilValue(exchangeInfoState);
 
   const [showTopTrade, setShowTopTrade] = useState(false);
+
+  const [searchInput, setSearchInput] = useState("");
+  const searchInputRef = useRef<TextInput>(null);
 
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const offsetY = event.nativeEvent.contentOffset.y;
@@ -130,7 +135,6 @@ export default function TradeScreen() {
     () =>
       debounce((text: string) => {
         searchSymbols(text);
-        setSearchHistory((prev) => [{ symbol: text, leverage: "5x" }, ...prev.filter((item) => item.symbol !== text)].slice(0, 10));
       }, 700),
     [searchSymbols]
   );
@@ -147,8 +151,15 @@ export default function TradeScreen() {
     setIsSearchActive(false);
   };
 
-  const removeHistoryItem = (symbol: string) => {
-    setSearchHistory((prev) => prev.filter((item) => item.symbol !== symbol));
+  const handleBottomSheetChange = (index: number) => {
+    setIsSymbolSheetOpen(index >= 0);
+
+    // BottomSheet가 닫힐 때 (index === -1)
+    if (index === -1) {
+      setIsSearchActive(false);
+      setSearchInput("");
+      searchInputRef.current?.blur(); // 포커스 해제
+    }
   };
 
   return (
@@ -302,7 +313,6 @@ export default function TradeScreen() {
         </BottomSheet>
 
         {/* Symbol Selection Bottom Sheet */}
-        {/* Symbol Selection Bottom Sheet */}
         <BottomSheet
           ref={symbolBottomSheetRef}
           index={-1}
@@ -310,9 +320,7 @@ export default function TradeScreen() {
           enablePanDownToClose={true}
           enableOverDrag={false}
           backdropComponent={renderBackdrop}
-          onChange={(index) => {
-            setIsSymbolSheetOpen(index >= 0);
-          }}
+          onChange={handleBottomSheetChange}
           enableContentPanningGesture={false}
           enableDynamicSizing={false}
           handleComponent={() => (
@@ -333,11 +341,15 @@ export default function TradeScreen() {
                 <View className="flex-row flex-1 bg-gray-100 h-12 rounded-lg px-4 py-3">
                   <MaterialIcons name="search" size={24} color="#999" />
                   <TextInput
+                    ref={searchInputRef}
                     className="flex-1 ml-2 text-base text-black"
                     placeholder="Search"
                     placeholderTextColor="#999"
-                    onChangeText={handleSearchInput}
-                    onPress={() => setIsSearchActive(true)}
+                    value={searchInput}
+                    onChangeText={(text) => {
+                      setSearchInput(text);
+                      handleSearchInput(text);
+                    }}
                     onFocus={() => setIsSearchActive(true)}
                   />
                 </View>
@@ -382,12 +394,7 @@ export default function TradeScreen() {
             )}
             {isSearchActive ? (
               <View style={{ flex: 1 }}>
-                <ScrollView
-                  onScroll={handleScroll}
-                  scrollEventThrottle={16}
-                  stickyHeaderIndices={searchHistory.length > 0 ? [1] : [0]} // Top Trade 섹션을 sticky로 만듭니다
-                >
-                  {/* Search History Section */}
+                <ScrollView onScroll={handleScroll} scrollEventThrottle={16} stickyHeaderIndices={searchHistory.length > 0 ? [1] : [0]}>
                   {/* Search History Section - 조건부 렌더링 */}
                   {searchHistory.length > 0 && (
                     <View className="px-4 py-3">
@@ -397,17 +404,20 @@ export default function TradeScreen() {
                           <MaterialIcons name="delete" size={24} color="#999" />
                         </TouchableOpacity>
                       </View>
-                      {searchHistory.map((item, index) => (
-                        <View key={index} className="flex-row justify-between items-center py-2">
-                          <View className="flex-row items-center">
-                            <Text className="text-gray-400">{item.symbol}</Text>
-                            <Text className="text-gray-500 ml-2">{item.leverage}</Text>
+                      <View className="flex-row flex-wrap gap-2">
+                        {searchHistory.map((item, index) => (
+                          <View key={index} className="mb-2">
+                            <View className="flex-row bg-gray-800/10 py-2 px-4 rounded-lg">
+                              <Text className="text-black font-medium">
+                                {item.baseAsset}/{item.quoteAsset}
+                              </Text>
+                              <View className="bg-white rounded-md px-1.5 ml-2">
+                                <Text className="text-gray-600 text-sm">{item.leverage}</Text>
+                              </View>
+                            </View>
                           </View>
-                          <TouchableOpacity onPress={() => removeHistoryItem(item.symbol)}>
-                            <Text className="text-gray-500">×</Text>
-                          </TouchableOpacity>
-                        </View>
-                      ))}
+                        ))}
+                      </View>
                     </View>
                   )}
 
@@ -418,9 +428,13 @@ export default function TradeScreen() {
                     </View>
                   </View>
 
-                  {/* Trading Pairs List */}
+                  {/* Top Trade List*/}
                   <View className="px-4">
-                    <TradingPairsList selectedTab={coin.selectedTab} selectedSubTabs={coin.selectedSubTabs} onPairSelect={() => symbolBottomSheetRef.current?.close()} />
+                    <TopTradeList
+                      onPress={() => {
+                        symbolBottomSheetRef.current?.close();
+                      }}
+                    />
                   </View>
                 </ScrollView>
               </View>
