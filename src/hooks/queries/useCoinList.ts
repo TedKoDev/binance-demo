@@ -16,10 +16,10 @@ export const useOrderBook = (symbol: string) => {
   });
 };
 
-export const useKlines = (symbol: string, interval: string) => {
+export const useKlines = (symbol: string, interval: string, limit: number = 100) => {
   return useQuery({
     queryKey: ["klines", symbol, interval],
-    queryFn: () => fetchKlines(symbol, interval),
+    queryFn: () => fetchKlines(symbol, interval, limit),
   });
 };
 

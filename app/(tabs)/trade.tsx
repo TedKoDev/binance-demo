@@ -293,7 +293,11 @@ export default function TradeScreen() {
                   onPress={() =>
                     router.push({
                       pathname: "/graph",
-                      params: { symbol: `${coin.selectedCoin}${coin.selectedPair}` },
+                      params: {
+                        symbol: `${coin.selectedCoin}${coin.selectedPair}`,
+                        baseAsset: coin.selectedCoin,
+                        quoteAsset: coin.selectedPair,
+                      },
                     })
                   }
                 >
